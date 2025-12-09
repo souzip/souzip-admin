@@ -3,10 +3,6 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vueDevTools from 'vite-plugin-vue-devtools'
 
-// 👇 이 두 줄 삭제!
-// import tailwindcss from 'tailwindcss'
-// import autoprefixer from 'autoprefixer'
-
 export default defineConfig({
   plugins: [
     vue(),
