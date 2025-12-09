@@ -1,22 +1,11 @@
-module.exports = {
+export default {
   extends: ['@commitlint/config-conventional'],
-  ignores: [
-    (message) => message.startsWith('chore(release)'),
-  ],
+  ignores: [(message) => message.startsWith('chore(release)')],
   rules: {
     'type-enum': [
       2,
       'always',
-      [
-        'feat',
-        'fix',
-        'docs',
-        'style',
-        'refactor',
-        'chore',
-        'perf',
-        'build',
-      ],
+      ['feat', 'fix', 'docs', 'style', 'refactor', 'chore', 'perf', 'build'],
     ],
   },
-};
+}
