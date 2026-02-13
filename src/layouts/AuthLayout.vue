@@ -5,7 +5,6 @@
         <div class="text-center mb-8">
           <img src="/logo.png" alt="Souzip Logo" class="h-20 mx-auto mb-3" />
         </div>
-
         <slot />
       </div>
     </main>
