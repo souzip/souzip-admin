@@ -1,9 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
-    <div class="fixed top-4 right-4 z-50">
-      <DarkModeToggle />
-    </div>
-
+  <div class="min-h-screen bg-gray-50 flex flex-col">
     <main class="flex-1 flex items-center justify-center px-4 py-12">
       <div class="w-full max-w-md">
         <div class="text-center mb-8">
@@ -15,7 +11,3 @@
     </main>
   </div>
 </template>
-
-<script setup>
-import DarkModeToggle from '@/components/DarkModeToggle.vue'
-</script>

@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 
 import LoginView from '@/views/admin/auth/LoginView.vue'
+import AdminLayout from '@/layouts/AdminLayout.vue'
 import DashboardView from '@/views/admin/DashboardView.vue'
 
 const routes = [
@@ -15,8 +16,14 @@ const routes = [
 
   {
     path: '/admin',
-    name: 'admin-dashboard',
-    component: DashboardView,
+    component: AdminLayout,
+    children: [
+      {
+        path: '',
+        name: 'admin-dashboard',
+        component: DashboardView,
+      },
+    ],
   },
 ]
 
