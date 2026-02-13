@@ -1,11 +1,21 @@
 <template>
-  <header class="h-14 bg-white border-b border-gray-200">
+  <header class="h-16 bg-white border-b border-gray-200">
     <div class="h-full px-6 flex items-center justify-between">
-      <div class="flex items-center gap-4">
-        <!-- 모바일용 햄버거 -->
+      <!-- 로고 -->
+      <div class="flex items-center">
+        <img src="/logo.png" alt="Souzip Logo" class="h-12" />
+      </div>
+
+      <div class="flex items-center gap-2">
+        <!-- 데스크톱용 로그아웃 버튼 -->
+        <button type="button" class="hidden md:block btn-secondary" @click="handleLogout">
+          로그아웃
+        </button>
+
+        <!-- 모바일/태블릿용 햄버거 버튼 -->
         <button
           type="button"
-          class="md:hidden p-2 rounded-lg hover:bg-gray-200 transition-colors"
+          class="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
           @click="onToggleSidebar"
         >
           <svg
@@ -23,15 +33,6 @@
             />
           </svg>
         </button>
-
-        <div class="flex items-center gap-2">
-          <img src="/logo.png" alt="Souzip Logo" class="h-8" />
-          <span class="text-sm font-semibold text-gray-900"> Souzip Admin </span>
-        </div>
-      </div>
-
-      <div>
-        <button type="button" class="btn-secondary" @click="handleLogout">로그아웃</button>
       </div>
     </div>
   </header>

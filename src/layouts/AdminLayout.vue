@@ -1,9 +1,19 @@
+<!-- AdminLayout.vue -->
 <template>
   <div class="min-h-screen bg-gray-50">
     <AdminTopbar @toggleSidebar="toggleSidebar" />
 
-    <div class="flex">
-      <AdminSidebar :open="sidebarOpen" />
+    <div class="flex relative">
+      <!-- 모바일 오버레이 배경 -->
+      <transition name="fade">
+        <div
+          v-if="sidebarOpen"
+          class="md:hidden fixed inset-0 bg-black bg-opacity-50 z-30"
+          @click="closeSidebar"
+        />
+      </transition>
+
+      <AdminSidebar :open="sidebarOpen" @close="closeSidebar" @logout="handleLogout" />
 
       <main class="flex-1 min-w-0">
         <div class="page-wrapper">
@@ -18,15 +28,28 @@
 import { ref } from 'vue'
 import AdminTopbar from '@/components/admin/AdminTopbar.vue'
 import AdminSidebar from '@/components/admin/AdminSidebar.vue'
+import { useAuth } from '@/composables/useAuth'
 
-const sidebarOpen = ref(true)
+const { handleLogout } = useAuth()
+const sidebarOpen = ref(false) // 모바일에서는 기본적으로 닫힌 상태
 
 function toggleSidebar() {
-  if (sidebarOpen.value === true) {
-    sidebarOpen.value = false
-    return
-  }
+  sidebarOpen.value = !sidebarOpen.value
+}
 
-  sidebarOpen.value = true
+function closeSidebar() {
+  sidebarOpen.value = false
 }
 </script>
+
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+</style>
