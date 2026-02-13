@@ -3,14 +3,6 @@ import { useRouter } from 'vue-router'
 import client from '@/api/Client'
 import { useAuthStore } from '@/stores/auth'
 
-function extractErrorMessage(error) {
-  if (error && error.response && error.response.data && error.response.data.message) {
-    return error.response.data.message
-  }
-
-  return '로그인에 실패했습니다.'
-}
-
 export function useAuth() {
   const router = useRouter()
   const auth = useAuthStore()
@@ -33,21 +25,14 @@ export function useAuth() {
         password: form.password,
       })
 
-      const payload = res && res.data ? res.data.data : null
-      if (payload === null) {
-        throw new Error('로그인 응답이 올바르지 않습니다.')
-      }
+      const { accessToken, refreshToken, id, username, role } = res.data.data
 
-      auth.setTokens(payload.accessToken, payload.refreshToken)
-      auth.setAdmin({
-        id: payload.id,
-        username: payload.username,
-        role: payload.role,
-      })
+      auth.setTokens(accessToken, refreshToken)
+      auth.setAdmin({ id, username, role })
 
       router.replace('/admin')
-    } catch (e) {
-      errorMessage.value = extractErrorMessage(e)
+    } catch (error) {
+      errorMessage.value = error?.response?.data?.message || '로그인에 실패했습니다.'
     } finally {
       loading.value = false
     }
@@ -58,7 +43,7 @@ export function useAuth() {
       await client.post('/api/admin/auth/logout')
     } finally {
       auth.clearAuth()
-      router.replace('/login')
+      router.replace('/admin/login')
     }
   }
 
