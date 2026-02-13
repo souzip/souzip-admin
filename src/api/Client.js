@@ -1,8 +1,6 @@
 import axios from 'axios'
 import { useAuthStore } from '@/stores/auth'
 
-console.log('환경 변수 확인:', import.meta.env.VITE_API_BASE_URL)
-
 const client = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
   withCredentials: false,
