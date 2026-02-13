@@ -1,13 +1,10 @@
-<!-- AdminSidebar.vue -->
 <template>
-  <!-- 데스크톱: 왼쪽 고정, 모바일/태블릿: 오른쪽에서 슬라이드 -->
   <aside
     class="w-64 bg-white border-gray-200 md:border-r md:min-h-[calc(100vh-56px)] md:relative fixed top-0 right-0 h-full border-l z-40 md:translate-x-0"
     :class="[openClass, { 'transition-transform duration-300 ease-in-out': isAnimating }]"
   >
     <div class="flex flex-col h-full">
-      <!-- 모바일용 헤더 (닫기 버튼) -->
-      <div class="md:hidden h-16 flex items-center justify-between px-6 border-b border-gray-200">
+      <div class="md:hidden h-16 flex items-center justify-between px-4 border-b border-gray-200">
         <span class="font-semibold text-gray-900">메뉴</span>
         <button
           type="button"

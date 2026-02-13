@@ -1,4 +1,3 @@
-<!-- AdminTopbar.vue -->
 <template>
   <header class="h-16 bg-white border-b border-gray-200">
     <div class="h-full px-6 flex items-center justify-between">
