@@ -1,61 +1,66 @@
-import { ref } from 'vue'
+import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import client from '@/api/Client'
+import { useAuthStore } from '@/stores/auth'
+
+function extractErrorMessage(error) {
+  if (error && error.response && error.response.data && error.response.data.message) {
+    return error.response.data.message
+  }
+
+  return '로그인에 실패했습니다.'
+}
 
 export function useAuth() {
   const router = useRouter()
-  
-  const form = ref({
+  const auth = useAuthStore()
+
+  const form = reactive({
     username: '',
     password: '',
   })
-  
+
   const loading = ref(false)
   const errorMessage = ref('')
-  
-  const clearError = () => {
+
+  async function handleLogin() {
     errorMessage.value = ''
-  }
-  
-  const setError = (message) => {
-    errorMessage.value = message
-  }
-  
-  const login = async (credentials) => {
-    try {
-      // TODO: 실제 API 호출로 교체
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-      
-      return { success: true }
-    } catch (error) {
-      return { success: false, error }
-    }
-  }
-  
-  const handleLogin = async () => {
     loading.value = true
-    clearError()
-    
+
     try {
-      const result = await login(form.value)
-      
-      if (result.success === true) {
-        router.push('/dashboard')
-        return
+      const res = await client.post('/api/admin/auth/login', {
+        username: form.username,
+        password: form.password,
+      })
+
+      const payload = res && res.data ? res.data.data : null
+      if (payload === null) {
+        throw new Error('로그인 응답이 올바르지 않습니다.')
       }
-      
-      setError('로그인에 실패했습니다. 아이디와 비밀번호를 확인해주세요.')
-    } catch (error) {
-      setError('로그인에 실패했습니다. 아이디와 비밀번호를 확인해주세요.')
-      console.error('로그인 에러:', error)
+
+      auth.setTokens(payload.accessToken, payload.refreshToken)
+      auth.setAdmin({
+        id: payload.id,
+        username: payload.username,
+        role: payload.role,
+      })
+
+      router.replace('/admin')
+    } catch (e) {
+      errorMessage.value = extractErrorMessage(e)
     } finally {
       loading.value = false
     }
   }
-  
-  return {
-    form,
-    loading,
-    errorMessage,
-    handleLogin,
+
+  async function handleLogout() {
+    try {
+      await client.post('/api/admin/auth/logout')
+    } finally {
+      auth.clearAuth()
+      router.replace('/login')
+    }
   }
+
+  return { form, loading, errorMessage, handleLogin, handleLogout }
 }

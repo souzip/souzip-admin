@@ -1,6 +1,15 @@
 <template>
-  <div v-show="show" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-    <div class="animate-spin rounded-full h-16 w-16 border-4 border-gray-300 border-t-primary-500"></div>
+  <div
+    v-show="show"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+    role="status"
+    aria-live="polite"
+    :aria-busy="show ? 'true' : 'false'"
+  >
+    <div
+      class="animate-spin rounded-full h-16 w-16 border-4 border-gray-300 border-t-primary-500"
+    ></div>
+    <span class="sr-only">Loading...</span>
   </div>
 </template>
 
