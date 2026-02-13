@@ -2,14 +2,6 @@
   <aside class="w-64 border-r border-gray-200 bg-white min-h-[calc(100vh-56px)]" :class="openClass">
     <nav class="p-4 space-y-1">
       <RouterLink to="/admin" class="nav-item" active-class="nav-active"> 대시보드 </RouterLink>
-
-      <RouterLink to="/admin/countries" class="nav-item" active-class="nav-active">
-        국가/도시
-      </RouterLink>
-
-      <RouterLink to="/admin/souvenirs" class="nav-item" active-class="nav-active">
-        기념품
-      </RouterLink>
     </nav>
   </aside>
 </template>
