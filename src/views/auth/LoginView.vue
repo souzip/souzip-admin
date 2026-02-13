@@ -1,43 +1,43 @@
 <template>
   <AuthLayout>
     <LoadingSpinner :show="loading" />
-    
+
     <div class="card">
       <form @submit.prevent="handleLogin" class="space-y-4">
         <div>
-          <label for="username" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            아이디
-          </label>
+          <label for="username" class="label-base">아이디</label>
           <input
             id="username"
             v-model="form.username"
             type="text"
             required
-            class="input-base w-full"
+            autocomplete="username"
+            class="input-base"
             placeholder="아이디를 입력하세요."
+            :aria-invalid="Boolean(errorMessage)"
           />
         </div>
-        
+
         <div>
-          <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            비밀번호
-          </label>
+          <label for="password" class="label-base">비밀번호</label>
           <input
             id="password"
             v-model="form.password"
             type="password"
             required
-            class="input-base w-full"
+            autocomplete="current-password"
+            class="input-base"
             placeholder="비밀번호를 입력하세요."
+            :aria-invalid="Boolean(errorMessage)"
           />
         </div>
-        
-        <div v-show="errorMessage" class="text-red-500 text-sm text-center">
+
+        <p v-if="errorMessage" class="text-red-500 text-sm text-center">
           {{ errorMessage }}
-        </div>
-        
+        </p>
+
         <button type="submit" class="btn-primary w-full" :disabled="loading">
-          로그인
+          {{ loading ? '로그인 중...' : '로그인' }}
         </button>
       </form>
     </div>

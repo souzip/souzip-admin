@@ -1,9 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: [
-    "./index.html",
-    "./src/**/*.{vue,js,ts,jsx,tsx}",
-  ],
+  content: ['./index.html', './src/**/*.{vue,js,ts,jsx,tsx}'],
   darkMode: 'class',
   theme: {
     extend: {
@@ -20,7 +17,8 @@ export default {
           800: '#b35127',
           900: '#994421',
         },
-        gray: {
+
+        appGray: {
           50: '#fafafa',
           100: '#f5f5f5',
           200: '#eeeeee',
@@ -33,10 +31,11 @@ export default {
           900: '#212121',
         },
       },
+
       borderRadius: {
-        'sm': '5px',
-        'DEFAULT': '10px',
-        'lg': '20px',
+        sm: '5px',
+        DEFAULT: '10px',
+        lg: '20px',
       },
     },
   },
