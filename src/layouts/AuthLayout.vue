@@ -8,7 +8,6 @@
       <div class="w-full max-w-md">
         <div class="text-center mb-8">
           <img src="/logo.png" alt="Souzip Logo" class="h-20 mx-auto mb-3" />
-          <p class="text-sm text-gray-500 dark:text-gray-400">Souzip Admin Console</p>
         </div>
 
         <slot />

@@ -47,7 +47,7 @@
 <script setup>
 import AuthLayout from '@/layouts/AuthLayout.vue'
 import LoadingSpinner from '@/components/LoadingSpinner.vue'
-import { useAuth } from '@/composables/useAuth'
+import { useAuth } from '@/composables/useAuth.js'
 
 const { form, loading, errorMessage, handleLogin } = useAuth()
 </script>
