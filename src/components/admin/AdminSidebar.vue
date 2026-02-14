@@ -30,8 +30,25 @@
 
       <!-- 네비게이션 -->
       <nav class="p-4 space-y-1 flex-1 overflow-y-auto">
-        <RouterLink to="/admin" class="nav-item" active-class="nav-active" @click="onNavClick">
+        <!-- 대시보드 -->
+        <RouterLink
+          to="/admin/dashboard"
+          class="nav-item"
+          active-class="nav-active"
+          @click="onNavClick"
+        >
           대시보드
+        </RouterLink>
+
+        <!-- 관리자 관리 (SUPER_ADMIN만) -->
+        <RouterLink
+          v-if="isSuperAdmin"
+          to="/admin/management"
+          class="nav-item"
+          active-class="nav-active"
+          @click="onNavClick"
+        >
+          관리자 관리
         </RouterLink>
       </nav>
 
@@ -45,6 +62,7 @@
 
 <script setup>
 import { computed, ref, watch } from 'vue'
+import { useAuthStore } from '@/stores/auth'
 
 const props = defineProps({
   open: {
@@ -55,7 +73,13 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'logout'])
 
+const auth = useAuthStore()
 const isAnimating = ref(false)
+
+// SUPER_ADMIN 체크
+const isSuperAdmin = computed(() => {
+  return auth.admin?.role === 'SUPER_ADMIN'
+})
 
 const openClass = computed(() => {
   if (props.open) {
@@ -64,7 +88,6 @@ const openClass = computed(() => {
   return 'translate-x-full'
 })
 
-// open 상태가 변경될 때만 애니메이션 활성화
 watch(
   () => props.open,
   () => {

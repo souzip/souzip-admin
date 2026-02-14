@@ -3,8 +3,17 @@
 @tailwind utilities;
 
 @layer base {
-  html {
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  html,
+  body {
     @apply text-gray-900;
+    height: 100%;
+    overflow: hidden;
   }
 
   body {
@@ -18,11 +27,11 @@
 
 @layer components {
   .page-wrapper {
-    @apply max-w-7xl mx-auto px-6 py-6;
+    @apply mx-auto;
   }
 
   .page-header {
-    @apply flex items-center justify-between gap-4 mb-6;
+    @apply flex items-center justify-between gap-4;
   }
 
   .filter-bar {
