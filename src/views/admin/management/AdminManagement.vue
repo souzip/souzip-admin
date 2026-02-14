@@ -461,7 +461,7 @@ onUnmounted(() => {
   flex: 1;
   overflow-y: auto;
   min-height: 0;
-  padding: 12px 12px 60px;
+  padding: 12px 12px 120px;
   display: none;
 }
 
