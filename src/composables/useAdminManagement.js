@@ -17,10 +17,11 @@ export function useAdminManagement() {
     { value: 'VIEWER', label: 'VIEWER', description: '조회만 가능' },
   ]
 
+  // 관리자 초대
   async function inviteAdmin() {
+    loading.value = true
     errorMessage.value = ''
     successMessage.value = ''
-    loading.value = true
 
     try {
       const res = await client.post('/api/admin/invite', {
@@ -29,14 +30,42 @@ export function useAdminManagement() {
         role: form.role,
       })
 
-      successMessage.value = res.data.message || '관리자 초대가 완료되었습니다.'
-
+      successMessage.value = '관리자 초대가 완료되었습니다.'
       resetForm()
 
       return res.data.data
     } catch (error) {
       errorMessage.value = error?.response?.data?.message || '관리자 초대에 실패했습니다.'
       throw error
+    } finally {
+      loading.value = false
+    }
+  }
+
+  // 관리자 목록 조회
+  async function getAdmins(pageNo = 1, pageSize = 20) {
+    const res = await client.get('/api/admin/list', {
+      params: { pageNo, pageSize },
+    })
+
+    return res.data.data
+  }
+
+  // 관리자 삭제
+  async function deleteAdmin(adminId) {
+    const res = await client.delete(`/api/admin/${adminId}`)
+    return res.data
+  }
+
+  // 여러 관리자 삭제
+  async function deleteAdmins(adminIds) {
+    loading.value = true
+
+    try {
+      const deletePromises = adminIds.map((id) => deleteAdmin(id))
+      await Promise.all(deletePromises)
+
+      return { success: true, count: adminIds.length }
     } finally {
       loading.value = false
     }
@@ -49,13 +78,15 @@ export function useAdminManagement() {
   }
 
   function validateForm() {
-    if (!form.username || form.username.length < 4 || form.username.length > 20) {
-      errorMessage.value = '아이디는 4-20자 사이여야 합니다.'
+    errorMessage.value = ''
+
+    if (!form.username || form.username.length < 2 || form.username.length > 20) {
+      errorMessage.value = '아이디는 2-20자 사이여야 합니다.'
       return false
     }
 
-    if (!/^[a-zA-Z0-9_]+$/.test(form.username)) {
-      errorMessage.value = '아이디는 영문, 숫자, 언더스코어만 가능합니다.'
+    if (!/^[a-zA-Z0-9_가-힣]+$/.test(form.username)) {
+      errorMessage.value = '아이디는 영문, 숫자, 언더스코어, 한글만 가능합니다.'
       return false
     }
 
@@ -79,6 +110,9 @@ export function useAdminManagement() {
     successMessage,
     roleOptions,
     inviteAdmin,
+    getAdmins,
+    deleteAdmin,
+    deleteAdmins,
     resetForm,
     validateForm,
   }

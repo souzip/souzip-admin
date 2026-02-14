@@ -50,7 +50,7 @@ export const useAuthStore = defineStore('auth', {
 
     setAdmin(admin) {
       this.admin = admin
-      localStorage.setItem(ADMIN_KEY, JSON.stringify(admin)) // ← 추가
+      localStorage.setItem(ADMIN_KEY, JSON.stringify(admin))
     },
 
     clearAuth() {
@@ -59,7 +59,7 @@ export const useAuthStore = defineStore('auth', {
       this.admin = null
       localStorage.removeItem(ACCESS_KEY)
       localStorage.removeItem(REFRESH_KEY)
-      localStorage.removeItem(ADMIN_KEY) // ← 추가
+      localStorage.removeItem(ADMIN_KEY)
     },
   },
 })
