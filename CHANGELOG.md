@@ -1,3 +1,16 @@
+# [1.2.0](https://github.com/souzip/souzip-admin/compare/v1.1.0...v1.2.0) (2026-02-14)
+
+### Bug Fixes
+
+- 새로고침시 404 버그 수정 ([4799f4d](https://github.com/souzip/souzip-admin/commit/4799f4dba102f76083db4edd0bfa21bd1a9cd8da))
+- 새로고침시 404 버그 수정 ([8a46467](https://github.com/souzip/souzip-admin/commit/8a4646776ceb94c11ae636de42ea7df19148fcb3))
+
+### Features
+
+- 관리자 목록 추가 ([480281a](https://github.com/souzip/souzip-admin/commit/480281a348169490352fe6a31ddfb894cc62a6bd))
+- 관리자 초대 API 함수 추가 ([3c0e431](https://github.com/souzip/souzip-admin/commit/3c0e431b0a911f0a3ebeef2e95941dc5c4355143))
+- 관리자 페이지 구현 ([4fb9f04](https://github.com/souzip/souzip-admin/commit/4fb9f04ee15ee3de5d9e5f1486a8891e84eed47e))
+
 # [1.1.0](https://github.com/souzip/souzip-admin/compare/v1.0.0...v1.1.0) (2026-02-13)
 
 ### Features
