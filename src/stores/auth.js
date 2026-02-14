@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 
 const ACCESS_KEY = 'admin_access_token'
 const REFRESH_KEY = 'admin_refresh_token'
+const ADMIN_KEY = 'admin_info'
 
 function readStorage(key) {
   const value = localStorage.getItem(key)
@@ -11,11 +12,23 @@ function readStorage(key) {
   return ''
 }
 
+function readAdminStorage() {
+  const value = localStorage.getItem(ADMIN_KEY)
+  if (value) {
+    try {
+      return JSON.parse(value)
+    } catch {
+      return null
+    }
+  }
+  return null
+}
+
 export const useAuthStore = defineStore('auth', {
   state: () => ({
     accessToken: readStorage(ACCESS_KEY),
     refreshToken: readStorage(REFRESH_KEY),
-    admin: null,
+    admin: readAdminStorage(),
   }),
 
   getters: {
@@ -37,6 +50,7 @@ export const useAuthStore = defineStore('auth', {
 
     setAdmin(admin) {
       this.admin = admin
+      localStorage.setItem(ADMIN_KEY, JSON.stringify(admin))
     },
 
     clearAuth() {
@@ -45,6 +59,7 @@ export const useAuthStore = defineStore('auth', {
       this.admin = null
       localStorage.removeItem(ACCESS_KEY)
       localStorage.removeItem(REFRESH_KEY)
+      localStorage.removeItem(ADMIN_KEY)
     },
   },
 })

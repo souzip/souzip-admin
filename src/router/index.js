@@ -4,9 +4,10 @@ import { useAuthStore } from '@/stores/auth'
 import LoginView from '@/views/admin/auth/LoginView.vue'
 import AdminLayout from '@/layouts/AdminLayout.vue'
 import DashboardView from '@/views/admin/DashboardView.vue'
+import AdminManagement from '@/views/admin/management/AdminManagement.vue'
 
 const routes = [
-  { path: '/', redirect: '/admin' },
+  { path: '/', redirect: '/admin/dashboard' },
 
   {
     path: '/admin/login',
@@ -17,11 +18,17 @@ const routes = [
   {
     path: '/admin',
     component: AdminLayout,
+    redirect: '/admin/dashboard',
     children: [
       {
-        path: '',
+        path: 'dashboard',
         name: 'admin-dashboard',
         component: DashboardView,
+      },
+      {
+        path: 'management',
+        name: 'admin-management',
+        component: AdminManagement,
       },
     ],
   },
