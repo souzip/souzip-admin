@@ -1,6 +1,6 @@
 <template>
   <header class="h-16 bg-white border-b border-gray-200">
-    <div class="h-full px-6 flex items-center justify-between">
+    <div class="h-full px-5 flex items-center justify-between">
       <!-- 로고 -->
       <div class="flex items-center">
         <img src="/logo.png" alt="Souzip Logo" class="h-12" />
