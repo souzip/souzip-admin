@@ -340,7 +340,10 @@ async function handleDeleteConfirm() {
 
 function formatDate(dateString) {
   if (!dateString) return '-'
-  const date = new Date(dateString)
+
+  const utcString = dateString.endsWith('Z') ? dateString : dateString + 'Z'
+  const date = new Date(utcString)
+
   return date.toLocaleString('ko-KR', {
     timeZone: 'Asia/Seoul',
     year: 'numeric',
