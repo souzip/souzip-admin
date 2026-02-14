@@ -1,3 +1,9 @@
+# [1.3.0](https://github.com/souzip/souzip-admin/compare/v1.2.0...v1.3.0) (2026-02-14)
+
+### Features
+
+- 메뉴 수정 ([3b80988](https://github.com/souzip/souzip-admin/commit/3b80988ebb270a6338eb31bb25a229a0df60d748))
+
 # [1.2.0](https://github.com/souzip/souzip-admin/compare/v1.1.0...v1.2.0) (2026-02-14)
 
 ### Bug Fixes
