@@ -307,12 +307,14 @@ function onLogout() {
   background: rgba(0, 0, 0, 0.05);
 }
 
-/* 일반 메뉴 active 스타일 */
 .nav-active {
   background: rgba(255, 119, 56, 0.14);
   color: rgba(255, 119, 56, 1);
 }
 
+.nav-active:hover {
+  background: rgba(255, 119, 56, 0.14);
+}
 /* 하위 메뉴용 스타일 (배경 없이 텍스트 색상만, 작은 크기) */
 .nav-subitem {
   background: transparent;
