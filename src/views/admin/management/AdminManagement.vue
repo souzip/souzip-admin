@@ -211,14 +211,14 @@ const isSuperAdmin = computed(() => {
 // 권한 체크 - 슈퍼관리자가 아니면 로그인 페이지로 리다이렉트
 function checkPermission() {
   if (!auth.admin) {
-    router.replace('/login')
+    router.replace('/admin/login')
     return false
   }
 
   if (!isSuperAdmin.value) {
     showAlert('이 페이지는 슈퍼관리자만 접근할 수 있습니다.')
     setTimeout(() => {
-      router.replace('/login')
+      router.replace('/admin/login')
     }, 1500)
     return false
   }
