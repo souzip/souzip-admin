@@ -170,7 +170,7 @@ onUnmounted(() => {
   justify-content: space-between;
   gap: 8px;
   width: 100%;
-  padding: 6px 10px 6px 12px;
+  padding: 8px 10px 8px 12px;
   background: #fff;
   border: 1px solid #d1d5db;
   border-radius: 8px;
@@ -181,10 +181,6 @@ onUnmounted(() => {
     border-color 0.15s,
     box-shadow 0.15s;
   white-space: nowrap;
-}
-
-.select-trigger:hover:not(:disabled) {
-  border-color: #9ca3af;
 }
 
 .open .select-trigger {

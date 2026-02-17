@@ -37,7 +37,7 @@
         value-key="id"
         label-key="nameKr"
         :disabled="countriesLoading || loading"
-        :placeholder="countriesLoading ? '불러오는 중...' : '선택해주세요'"
+        :placeholder="countriesLoading ? '불러오는 중' : '선택해주세요'"
         @change="onCountryChange"
       />
       <div class="search-wrap">
@@ -76,7 +76,7 @@
           <tr v-if="loading && items.length === 0">
             <td colspan="4" class="loading-cell">
               <div class="flex items-center justify-center gap-2 text-gray-500">
-                <span class="table-spinner"></span>불러오는 중...
+                <span class="table-spinner"></span>불러오는 중
               </div>
             </td>
           </tr>
@@ -142,7 +142,7 @@
     <!-- 모바일 카드 -->
     <div v-else ref="scrollContainer" class="card-container" @scroll="handleScroll">
       <div v-if="loading && items.length === 0" class="loading-card">
-        <span class="table-spinner"></span>불러오는 중...
+        <span class="table-spinner"></span>불러오는 중
       </div>
       <div v-else-if="!loading && items.length === 0 && searchKeyword" class="empty-card">
         '{{ searchKeyword }}'에 대한 검색 결과가 없습니다.
@@ -195,7 +195,7 @@
         <div v-if="loadingMore" class="loading-more-card">
           <div class="flex items-center justify-center gap-2">
             <div class="loading-spinner"></div>
-            <span>불러오는 중...</span>
+            <span>불러오는 중</span>
           </div>
         </div>
       </template>
@@ -472,7 +472,6 @@ function formatDate(dateString) {
   background: #fafafa;
   flex-shrink: 0;
 }
-
 .filter-count {
   font-size: 12px;
   color: #9ca3af;
@@ -487,7 +486,7 @@ function formatDate(dateString) {
 }
 .search-input {
   width: 100%;
-  padding: 5px 28px 5px 10px;
+  padding: 8px 28px 8px 10px;
   font-size: 13px;
   border: 1px solid #e5e7eb;
   border-radius: 6px;

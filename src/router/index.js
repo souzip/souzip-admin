@@ -20,7 +20,7 @@ const routes = [
   {
     path: '/admin',
     component: AdminLayout,
-    redirect: '/admin/countries',
+    redirect: '/admin/cities',
     children: [
       // {
       //   path: 'dashboard',
