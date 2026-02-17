@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { useAuthStore } from '@/stores/auth'
+import { useGlobalModal } from '@/stores/globalModal'
 
 const client = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
@@ -22,6 +23,13 @@ client.interceptors.request.use((config) => {
 client.interceptors.response.use(
   (res) => res,
   async (error) => {
+    // ─── 403 권한 없음 ───────────────────────────────────────────────
+    if (error?.response?.status === 403) {
+      const globalModal = useGlobalModal()
+      globalModal.showAlert('접근 권한이 없습니다.')
+      throw error
+    }
+
     if (error?.response?.status !== 401) {
       throw error
     }
