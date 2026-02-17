@@ -76,14 +76,14 @@
           <!-- 하위 메뉴 -->
           <div v-if="isDestinationOpen" class="nav-submenu">
             <!-- 나라 관리 -->
-            <RouterLink
+            <!--            <RouterLink
               to="/admin/countries"
               class="nav-item nav-subitem"
               active-class="nav-subitem-active"
               @click="onNavClick"
             >
               <div class="flex items-center gap-2">
-                <!-- 깃발 아이콘 -->
+                &lt;!&ndash; 깃발 아이콘 &ndash;&gt;
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   class="h-4 w-4"
@@ -100,7 +100,7 @@
                 </svg>
                 <span>나라 관리</span>
               </div>
-            </RouterLink>
+            </RouterLink>-->
 
             <!-- 도시 관리 -->
             <RouterLink
@@ -195,7 +195,7 @@ const isSuperAdmin = computed(() => {
 
 // 여행지 관리 active 상태 체크
 const isDestinationActive = computed(() => {
-  return route.path.includes('/admin/countries') || route.path.includes('/admin/cities')
+  return route.path.includes('/admin/cities') || route.path.includes('/admin/cities')
 })
 
 const openClass = computed(() => {
@@ -219,7 +219,7 @@ watch(
 watch(
   () => route.path,
   (newPath) => {
-    if (newPath.includes('/admin/countries') || newPath.includes('/admin/cities')) {
+    if (newPath.includes('/admin/cities') || newPath.includes('/admin/cities')) {
       // 여행지 관리 경로일 때 열기
       isDestinationOpen.value = true
     } else {
@@ -236,7 +236,7 @@ function handleDestinationClick() {
 
   // 데스크탑(md 이상)에서만 나라 관리로 이동
   if (window.innerWidth >= 768) {
-    router.push('/admin/countries')
+    router.push('/admin/cities')
   }
 }
 
