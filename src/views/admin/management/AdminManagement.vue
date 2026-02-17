@@ -1,19 +1,16 @@
 <template>
   <div class="admin-management-container">
-    <!-- 액션 바 (헤더 제거, 버튼만) -->
+    <!-- 액션 바 (슈퍼관리자만) -->
     <div class="action-bar">
       <div class="action-buttons">
         <button
-          v-if="isSuperAdmin"
           type="button"
           class="px-4 py-2 bg-primary-500 text-white rounded transition-colors text-sm"
           @click="openInviteModal"
         >
           신규 관리자 등록
         </button>
-
         <button
-          v-if="isSuperAdmin"
           type="button"
           class="px-4 py-2 rounded transition-colors text-sm"
           :class="
@@ -57,8 +54,14 @@
             <td colspan="4" class="empty-cell">등록된 관리자가 없습니다.</td>
           </tr>
           <template v-else>
-            <tr v-for="admin in items" :key="admin.id">
-              <td class="text-center">
+            <tr
+              v-for="admin in items"
+              :key="admin.id"
+              class="row-clickable"
+              :class="{ 'row-selected': selectedIds.includes(admin.id) }"
+              @click="toggleSelect(admin.id)"
+            >
+              <td class="text-center" @click.stop>
                 <input
                   type="checkbox"
                   class="rounded border-gray-300"
@@ -102,12 +105,19 @@
         등록된 관리자가 없습니다.
       </div>
       <template v-else>
-        <div v-for="admin in items" :key="admin.id" class="admin-card">
+        <div
+          v-for="admin in items"
+          :key="admin.id"
+          class="admin-card card-clickable"
+          :class="{ 'card-selected': selectedIds.includes(admin.id) }"
+          @click="toggleSelect(admin.id)"
+        >
           <div class="card-header">
             <input
               type="checkbox"
               class="rounded border-gray-300"
               :checked="selectedIds.includes(admin.id)"
+              @click.stop
               @change="toggleSelect(admin.id)"
             />
             <span
@@ -178,7 +188,6 @@ const router = useRouter()
 const auth = useAuthStore()
 const { getAdmins, deleteAdmins } = useAdminManagement()
 
-// ─── 반응형 분기 ─────────────────────────────────────────────────────
 const isMobile = ref(window.innerWidth <= 600)
 const onResize = () => {
   isMobile.value = window.innerWidth <= 600
@@ -186,16 +195,14 @@ const onResize = () => {
 
 const isSuperAdmin = computed(() => auth.admin?.role === 'SUPER_ADMIN')
 
+// superAdmin 아니면 로그인으로 리다이렉트
 function checkPermission() {
   if (!auth.admin) {
     router.replace('/admin/login')
     return false
   }
   if (!isSuperAdmin.value) {
-    showAlert('이 페이지는 슈퍼관리자만 접근할 수 있습니다.')
-    setTimeout(() => {
-      router.replace('/admin/login')
-    }, 1500)
+    router.replace('/admin/login')
     return false
   }
   return true
@@ -318,7 +325,6 @@ onUnmounted(() => {
   background: #fff;
   overflow: hidden;
 }
-
 .action-bar {
   display: flex;
   justify-content: flex-end;
@@ -333,8 +339,6 @@ onUnmounted(() => {
   display: flex;
   gap: 8px;
 }
-
-/* 테이블 */
 .table-container {
   flex: 1;
   overflow-y: auto;
@@ -360,6 +364,7 @@ onUnmounted(() => {
 }
 .data-table tbody tr {
   border-bottom: 1px solid #f3f4f6;
+  transition: background 0.1s;
 }
 .data-table tbody tr:hover {
   background: #f9fafb;
@@ -368,6 +373,15 @@ onUnmounted(() => {
   padding: 12px 16px;
   font-size: 13px;
   color: #1f2937;
+}
+.row-clickable {
+  cursor: pointer;
+}
+.row-selected {
+  background: #fff5f0 !important;
+}
+.row-selected:hover {
+  background: #ffe8dc !important;
 }
 .loading-cell,
 .empty-cell {
@@ -381,8 +395,6 @@ onUnmounted(() => {
   color: #6b7280;
   font-size: 13px;
 }
-
-/* 카드 */
 .card-container {
   flex: 1;
   overflow-y: auto;
@@ -395,6 +407,14 @@ onUnmounted(() => {
   border-radius: 8px;
   margin-bottom: 12px;
   padding: 16px;
+  transition: all 0.1s;
+}
+.card-clickable {
+  cursor: pointer;
+}
+.card-selected {
+  background: #fff5f0 !important;
+  border-color: #ffb899 !important;
 }
 .card-header {
   display: flex;
@@ -411,7 +431,6 @@ onUnmounted(() => {
 }
 .card-field {
   display: flex;
-  flex-direction: row;
   justify-content: space-between;
   align-items: center;
   gap: 8px;
@@ -438,8 +457,6 @@ onUnmounted(() => {
   color: #6b7280;
   font-size: 13px;
 }
-
-/* 스피너 */
 .loading-spinner {
   width: 16px;
   height: 16px;
@@ -453,13 +470,10 @@ onUnmounted(() => {
     transform: rotate(360deg);
   }
 }
-
 .sentinel {
   height: 1px;
   visibility: hidden;
 }
-
-/* 역할 뱃지 */
 .role-badge {
   display: inline-block;
   padding: 4px 12px;
@@ -479,8 +493,6 @@ onUnmounted(() => {
   background: #d1fae5;
   color: #059669;
 }
-
-/* 스크롤바 */
 .table-container::-webkit-scrollbar,
 .card-container::-webkit-scrollbar {
   width: 8px;
@@ -498,8 +510,6 @@ onUnmounted(() => {
 .card-container::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }
-
-/* 모바일 */
 @media (max-width: 600px) {
   .action-bar {
     padding: 8px 12px;
@@ -509,7 +519,7 @@ onUnmounted(() => {
     flex-direction: column;
   }
   .action-buttons button {
-    flex: 1;
+    width: 100%;
   }
 }
 @media (max-width: 350px) {

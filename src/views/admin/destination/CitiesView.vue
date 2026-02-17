@@ -22,7 +22,8 @@
         <button v-if="searchKeyword" class="search-clear" @click="clearSearch">✕</button>
       </div>
       <span v-if="items.length > 0" class="filter-count">총 {{ totalItems }}개</span>
-      <div class="filter-actions">
+
+      <div v-if="canEdit" class="filter-actions">
         <button
           type="button"
           class="px-4 py-2 bg-primary-500 text-white rounded transition-colors text-sm font-medium hover:bg-primary-600"
@@ -53,7 +54,7 @@
       <table class="data-table">
         <thead>
           <tr>
-            <th class="w-12">
+            <th v-if="canEdit" class="w-12">
               <input
                 type="checkbox"
                 class="rounded border-gray-300"
@@ -69,23 +70,31 @@
         </thead>
         <tbody>
           <tr v-if="loading && items.length === 0">
-            <td colspan="4" class="loading-cell">
+            <td :colspan="canEdit ? 4 : 3" class="loading-cell">
               <div class="flex items-center justify-center gap-2 text-gray-500">
                 <span class="table-spinner"></span>불러오는 중
               </div>
             </td>
           </tr>
           <tr v-else-if="!loading && items.length === 0 && searchKeyword">
-            <td colspan="4" class="empty-cell">
+            <td :colspan="canEdit ? 4 : 3" class="empty-cell">
               '{{ searchKeyword }}'에 대한 검색 결과가 없습니다.
             </td>
           </tr>
           <tr v-else-if="!loading && items.length === 0">
-            <td colspan="4" class="empty-cell">등록된 도시가 없습니다.</td>
+            <td :colspan="canEdit ? 4 : 3" class="empty-cell">등록된 도시가 없습니다.</td>
           </tr>
           <template v-else>
-            <tr v-for="city in items" :key="city.id">
-              <td class="text-center">
+            <tr
+              v-for="city in items"
+              :key="city.id"
+              :class="{
+                'row-clickable': canEdit,
+                'row-selected': selectedIds.includes(city.id),
+              }"
+              @click="canEdit && toggleSelect(city.id)"
+            >
+              <td v-if="canEdit" class="text-center" @click.stop>
                 <input
                   type="checkbox"
                   class="rounded border-gray-300"
@@ -94,10 +103,10 @@
                 />
               </td>
               <td>{{ city.nameKr }}</td>
-              <td class="text-center">
+              <td class="text-center" @click.stop>
                 <div class="priority-wrap">
                   <input
-                    v-if="editingPriorityId === city.id"
+                    v-if="canEdit && editingPriorityId === city.id"
                     v-model="editingPriorityValue"
                     v-focus
                     type="number"
@@ -112,7 +121,8 @@
                     type="button"
                     class="priority-badge"
                     :class="city.priority ? 'priority-set' : 'priority-unset'"
-                    @click="startEditPriority(city)"
+                    :style="!canEdit ? 'cursor: default; pointer-events: none;' : ''"
+                    @click.stop="canEdit && startEditPriority(city)"
                   >
                     {{ city.priority ?? '미설정' }}
                   </button>
@@ -121,7 +131,7 @@
               <td class="text-center text-gray-500 text-xs">{{ formatDate(city.updatedAt) }}</td>
             </tr>
             <tr v-if="loadingMore">
-              <td colspan="4" class="loading-more-cell">
+              <td :colspan="canEdit ? 4 : 3" class="loading-more-cell">
                 <div class="flex items-center justify-center gap-2">
                   <div class="loading-spinner"></div>
                   <span>불러오는 중...</span>
@@ -146,22 +156,41 @@
         등록된 도시가 없습니다.
       </div>
       <template v-else>
-        <div v-for="city in items" :key="city.id" class="city-card">
+        <div
+          v-for="city in items"
+          :key="city.id"
+          class="city-card"
+          :class="{
+            'card-selected': selectedIds.includes(city.id),
+            'card-clickable': canEdit,
+          }"
+          @click="canEdit && toggleSelect(city.id)"
+        >
           <div class="card-header">
             <input
+              v-if="canEdit"
               type="checkbox"
               class="rounded border-gray-300"
               :checked="selectedIds.includes(city.id)"
+              @click.stop
               @change="toggleSelect(city.id)"
             />
             <button
+              v-if="canEdit"
               type="button"
               class="priority-badge"
               :class="city.priority ? 'priority-set' : 'priority-unset'"
-              @click="startEditPriority(city)"
+              @click.stop="startEditPriority(city)"
             >
               우선순위: {{ city.priority ?? '미설정' }}
             </button>
+            <span
+              v-else
+              class="priority-badge"
+              :class="city.priority ? 'priority-set' : 'priority-unset'"
+            >
+              우선순위: {{ city.priority ?? '미설정' }}
+            </span>
           </div>
           <div class="card-body">
             <div class="card-field">
@@ -172,7 +201,7 @@
               <span class="card-label">최종 수정</span>
               <span class="card-value text-gray-500">{{ formatDate(city.updatedAt) }}</span>
             </div>
-            <div v-if="editingPriorityId === city.id" class="card-field">
+            <div v-if="canEdit && editingPriorityId === city.id" class="card-field" @click.stop>
               <span class="card-label">우선순위 입력</span>
               <input
                 v-model="editingPriorityValue"
@@ -223,6 +252,7 @@
 
 <script setup>
 import { ref, computed, reactive, onMounted, onUnmounted } from 'vue'
+import { useAuthStore } from '@/stores/auth'
 import { useDestination } from '@/composables/useDestination'
 import { useInfiniteScroll } from '@/composables/useInfiniteScroll'
 import CustomSelect from '@/components/CustomSelect.vue'
@@ -235,6 +265,10 @@ const vFocus = {
     el.focus()
   },
 }
+
+const auth = useAuthStore()
+// SUPER_ADMIN, ADMIN → CUD 가능 / VIEWER → R만
+const canEdit = computed(() => ['SUPER_ADMIN', 'ADMIN'].includes(auth.admin?.role))
 
 const { errorMessage, countries, getCountries, fetchCitiesPage, deleteCities, updateCityPriority } =
   useDestination()
@@ -278,13 +312,10 @@ const {
 // ─── 초기화 ─────────────────────────────────────────────────────────
 onMounted(async () => {
   window.addEventListener('resize', onResize)
-
   countriesLoading.value = true
   try {
     await getCountries()
-    if (countries.value.length > 0) {
-      selectedCountryId.value = countries.value[0].id
-    }
+    selectedCountryId.value = 83
   } finally {
     countriesLoading.value = false
   }
@@ -296,7 +327,6 @@ onUnmounted(() => {
   cleanup()
 })
 
-// 나라 변경
 async function onCountryChange() {
   selectedIds.value = []
   cancelPriority()
@@ -304,7 +334,6 @@ async function onCountryChange() {
   await resetAndLoad()
 }
 
-// 검색: 300ms 디바운스
 let searchTimer = null
 function onSearchInput() {
   clearTimeout(searchTimer)
@@ -312,7 +341,7 @@ function onSearchInput() {
     selectedIds.value = []
     cancelPriority()
     resetAndLoad()
-  }, 300)
+  }, 200)
 }
 
 function clearSearch() {
@@ -345,6 +374,7 @@ const editingPriorityId = ref(null)
 const editingPriorityValue = ref('')
 
 function startEditPriority(city) {
+  if (!canEdit.value) return
   editingPriorityId.value = city.id
   editingPriorityValue.value = city.priority ?? ''
 }
@@ -354,6 +384,7 @@ function cancelPriority() {
 }
 
 async function savePriority(cityId) {
+  if (!canEdit.value) return
   if (editingPriorityId.value !== cityId) return
   const raw = editingPriorityValue.value
   const priority = raw === '' ? null : parseInt(raw)
@@ -535,6 +566,15 @@ function formatDate(dateString) {
   font-size: 13px;
   color: #1f2937;
 }
+.row-clickable {
+  cursor: pointer;
+}
+.row-selected {
+  background: #fff5f0 !important;
+}
+.row-selected:hover {
+  background: #ffe8dc !important;
+}
 .loading-cell,
 .empty-cell {
   padding: 60px 16px;
@@ -551,6 +591,7 @@ function formatDate(dateString) {
 .priority-wrap {
   display: flex;
   justify-content: center;
+  align-items: center;
 }
 .priority-badge {
   display: inline-flex;
@@ -642,6 +683,14 @@ function formatDate(dateString) {
   border-radius: 8px;
   margin-bottom: 10px;
   padding: 14px 16px;
+  transition: all 0.1s;
+}
+.card-clickable {
+  cursor: pointer;
+}
+.card-selected {
+  background: #fff5f0 !important;
+  border-color: #ffb899 !important;
 }
 .card-header {
   display: flex;
@@ -711,7 +760,7 @@ function formatDate(dateString) {
     flex-direction: column;
   }
   .filter-actions button {
-    flex: 1;
+    width: 100%;
   }
 }
 @media (max-width: 350px) {
