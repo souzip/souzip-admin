@@ -21,7 +21,7 @@
           :disabled="deleting || selectedIds.length === 0"
           @click="openDeleteConfirm"
         >
-          <span v-if="deleting">삭제 중...</span>
+          <span v-if="deleting">삭제 중</span>
           <span v-else-if="selectedIds.length > 0">선택 삭제 ({{ selectedIds.length }})</span>
           <span v-else>선택 삭제</span>
         </button>
@@ -48,7 +48,7 @@
         </thead>
         <tbody>
           <tr v-if="loading && items.length === 0">
-            <td colspan="4" class="loading-cell">로딩 중...</td>
+            <td colspan="4" class="loading-cell">로딩 중</td>
           </tr>
           <tr v-else-if="!loading && items.length === 0">
             <td colspan="4" class="empty-cell">등록된 관리자가 없습니다.</td>
@@ -88,7 +88,7 @@
               <td colspan="4" class="loading-more-cell">
                 <div class="flex items-center justify-center gap-2">
                   <div class="loading-spinner"></div>
-                  <span>추가 데이터 로딩 중...</span>
+                  <span>추가 데이터 로딩 중</span>
                 </div>
               </td>
             </tr>
@@ -100,7 +100,7 @@
 
     <!-- 모바일 카드 -->
     <div v-else ref="scrollContainer" class="card-container" @scroll="handleScroll">
-      <div v-if="loading && items.length === 0" class="loading-card">로딩 중...</div>
+      <div v-if="loading && items.length === 0" class="loading-card">로딩 중</div>
       <div v-else-if="!loading && items.length === 0" class="empty-card">
         등록된 관리자가 없습니다.
       </div>
@@ -145,7 +145,7 @@
         <div v-if="loadingMore" class="loading-more-card">
           <div class="flex items-center justify-center gap-2">
             <div class="loading-spinner"></div>
-            <span>추가 데이터 로딩 중...</span>
+            <span>추가 데이터 로딩 중</span>
           </div>
         </div>
       </template>

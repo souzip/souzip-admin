@@ -65,7 +65,7 @@
             </th>
             <th class="text-left">도시명</th>
             <th class="text-center w-28">우선순위</th>
-            <th class="text-center w-44">최종 수정일</th>
+            <th class="text-center w-44">수정일</th>
           </tr>
         </thead>
         <tbody>
@@ -198,7 +198,7 @@
               <span class="card-value">{{ city.nameKr }}</span>
             </div>
             <div class="card-field">
-              <span class="card-label">최종 수정</span>
+              <span class="card-label">수정일</span>
               <span class="card-value text-gray-500">{{ formatDate(city.updatedAt) }}</span>
             </div>
             <div v-if="canEdit && editingPriorityId === city.id" class="card-field" @click.stop>
@@ -623,7 +623,7 @@ function formatDate(dateString) {
   padding: 3px 8px;
   border: 1px solid #ff7738;
   border-radius: 6px;
-  font-size: 13px;
+  font-size: 13px; /* 데스크톱은 13px 유지 */
   text-align: center;
   outline: none;
   box-shadow: 0 0 0 2px rgba(255, 119, 56, 0.2);
@@ -761,6 +761,9 @@ function formatDate(dateString) {
   }
   .filter-actions button {
     width: 100%;
+  }
+  .priority-input {
+    font-size: 16px;
   }
 }
 @media (max-width: 350px) {
