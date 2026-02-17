@@ -67,7 +67,6 @@ client.interceptors.response.use(
       const { accessToken, refreshToken } = res.data.data
       auth.setTokens(accessToken, refreshToken)
 
-      // 대기 중인 요청들 처리
       refreshState.queue.forEach((promise) => promise.resolve(accessToken))
       refreshState.queue = []
 

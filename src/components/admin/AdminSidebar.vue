@@ -76,14 +76,14 @@
           <!-- 하위 메뉴 -->
           <div v-if="isDestinationOpen" class="nav-submenu">
             <!-- 나라 관리 -->
-            <RouterLink
+            <!--            <RouterLink
               to="/admin/countries"
               class="nav-item nav-subitem"
               active-class="nav-subitem-active"
               @click="onNavClick"
             >
               <div class="flex items-center gap-2">
-                <!-- 깃발 아이콘 -->
+                &lt;!&ndash; 깃발 아이콘 &ndash;&gt;
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   class="h-4 w-4"
@@ -100,7 +100,7 @@
                 </svg>
                 <span>나라 관리</span>
               </div>
-            </RouterLink>
+            </RouterLink>-->
 
             <!-- 도시 관리 -->
             <RouterLink
