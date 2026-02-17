@@ -315,9 +315,7 @@ onMounted(async () => {
   countriesLoading.value = true
   try {
     await getCountries()
-    if (countries.value.length > 0) {
-      selectedCountryId.value = countries.value[0].id
-    }
+    selectedCountryId.value = 83
   } finally {
     countriesLoading.value = false
   }
