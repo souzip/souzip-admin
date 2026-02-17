@@ -3,13 +3,13 @@ import { useAuthStore } from '@/stores/auth'
 
 import LoginView from '@/views/admin/auth/LoginView.vue'
 import AdminLayout from '@/layouts/AdminLayout.vue'
-// import DashboardView from '@/views/admin/DashboardView.vue' // 대시보드 임시 제거
+// import DashboardView from '@/views/admin/DashboardView.vue'
 import AdminManagement from '@/views/admin/management/AdminManagement.vue'
-import CountriesView from '@/views/admin/destination/CountriesView.vue'
+// import CountriesView from '@/views/admin/destination/CountriesView.vue'
 import CitiesView from '@/views/admin/destination/CitiesView.vue'
 
 const routes = [
-  { path: '/', redirect: '/admin/countries' }, // 변경
+  { path: '/', redirect: '/admin/cities' },
 
   {
     path: '/admin/login',
@@ -20,18 +20,18 @@ const routes = [
   {
     path: '/admin',
     component: AdminLayout,
-    redirect: '/admin/countries', // 변경
+    redirect: '/admin/countries',
     children: [
       // {
       //   path: 'dashboard',
       //   name: 'admin-dashboard',
       //   component: DashboardView,
       // }, // 대시보드 임시 숨김
-      {
-        path: 'countries',
-        name: 'admin-countries',
-        component: CountriesView,
-      },
+      // {
+      //   path: 'countries',
+      //   name: 'admin-countries',
+      //   component: CountriesView,
+      // },
       {
         path: 'cities',
         name: 'admin-cities',
