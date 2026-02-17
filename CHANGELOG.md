@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/souzip/souzip-admin/compare/v1.3.0...v1.4.0) (2026-02-17)
+
+### Features
+
+- 도시 관리 구현 ([d6a97af](https://github.com/souzip/souzip-admin/commit/d6a97af10ad8992febbb9a692ee4d6efb7f9b567))
+- 도시 관리 구현 ([87f5c5c](https://github.com/souzip/souzip-admin/commit/87f5c5c118b634d081c679a84179923eebf0f3f4))
+
 # [1.3.0](https://github.com/souzip/souzip-admin/compare/v1.2.0...v1.3.0) (2026-02-14)
 
 ### Features
