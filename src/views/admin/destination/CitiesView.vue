@@ -1,9 +1,28 @@
 <template>
   <div class="cities-container">
-    <!-- 헤더 -->
-    <div class="page-header">
-      <h1 class="text-xl font-semibold text-gray-900">도시 관리</h1>
-      <div class="header-buttons">
+    <!-- 필터 바 -->
+    <div class="filter-bar">
+      <CustomSelect
+        v-model="selectedCountryId"
+        :options="countries"
+        value-key="id"
+        label-key="nameKr"
+        :disabled="countriesLoading || loading"
+        :placeholder="countriesLoading ? '불러오는 중' : '선택해주세요'"
+        @change="onCountryChange"
+      />
+      <div class="search-wrap">
+        <input
+          v-model="searchKeyword"
+          type="text"
+          class="search-input"
+          placeholder="도시명 검색"
+          @input="onSearchInput"
+        />
+        <button v-if="searchKeyword" class="search-clear" @click="clearSearch">✕</button>
+      </div>
+      <span v-if="items.length > 0" class="filter-count">총 {{ totalItems }}개</span>
+      <div class="filter-actions">
         <button
           type="button"
           class="px-4 py-2 bg-primary-500 text-white rounded transition-colors text-sm font-medium hover:bg-primary-600"
@@ -27,30 +46,6 @@
           <span v-else>선택 삭제</span>
         </button>
       </div>
-    </div>
-
-    <!-- 필터 바 -->
-    <div class="filter-bar">
-      <CustomSelect
-        v-model="selectedCountryId"
-        :options="countries"
-        value-key="id"
-        label-key="nameKr"
-        :disabled="countriesLoading || loading"
-        :placeholder="countriesLoading ? '불러오는 중' : '선택해주세요'"
-        @change="onCountryChange"
-      />
-      <div class="search-wrap">
-        <input
-          v-model="searchKeyword"
-          type="text"
-          class="search-input"
-          placeholder="도시명 검색"
-          @input="onSearchInput"
-        />
-        <button v-if="searchKeyword" class="search-clear" @click="clearSearch">✕</button>
-      </div>
-      <span v-if="items.length > 0" class="filter-count">총 {{ totalItems }}개</span>
     </div>
 
     <!-- 데스크톱 테이블 -->
@@ -451,18 +446,6 @@ function formatDate(dateString) {
   background: #fff;
   overflow: hidden;
 }
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 20px;
-  border-bottom: 1px solid #e5e7eb;
-  flex-shrink: 0;
-}
-.header-buttons {
-  display: flex;
-  gap: 8px;
-}
 .filter-bar {
   display: flex;
   align-items: center;
@@ -471,11 +454,18 @@ function formatDate(dateString) {
   border-bottom: 1px solid #f3f4f6;
   background: #fafafa;
   flex-shrink: 0;
+  margin-bottom: 0 !important;
 }
 .filter-count {
   font-size: 12px;
   color: #9ca3af;
   white-space: nowrap;
+}
+.filter-actions {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+  flex-shrink: 0;
 }
 .search-wrap {
   position: relative;
@@ -697,13 +687,9 @@ function formatDate(dateString) {
   font-size: 13px;
 }
 @media (max-width: 600px) {
-  .page-header {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 10px;
-  }
   .filter-bar {
     flex-wrap: wrap;
+    padding: 8px 12px;
   }
   .filter-bar :deep(.custom-select) {
     width: 100%;
@@ -713,11 +699,19 @@ function formatDate(dateString) {
     max-width: 100%;
     flex: 1 1 100%;
   }
-  .header-buttons {
+  .search-input {
+    font-size: 16px;
+  }
+  .filter-count {
+    display: none;
+  }
+  .filter-actions {
+    width: 100%;
+    margin-left: 0;
     flex-direction: column;
   }
-  .header-buttons button {
-    width: 100%;
+  .filter-actions button {
+    flex: 1;
   }
 }
 @media (max-width: 350px) {
