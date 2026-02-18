@@ -23,14 +23,11 @@ client.interceptors.request.use((config) => {
 client.interceptors.response.use(
   (res) => res,
   async (error) => {
-    // ─── 403 권한 없음 ───────────────────────────────────────────────
-    if (error?.response?.status === 403) {
-      const globalModal = useGlobalModal()
-      globalModal.showAlert('접근 권한이 없습니다.')
-      throw error
-    }
-
     if (error?.response?.status !== 401) {
+      if (error?.response?.status === 403) {
+        const globalModal = useGlobalModal()
+        globalModal.showAlert('접근 권한이 없습니다.')
+      }
       throw error
     }
 
