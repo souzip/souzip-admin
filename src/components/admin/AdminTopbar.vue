@@ -2,7 +2,7 @@
   <header class="h-16 bg-white border-b border-gray-200">
     <div class="h-full px-5 flex items-center justify-between">
       <!-- 로고 -->
-      <div class="flex items-center">
+      <div class="flex items-center cursor-pointer" @click="goToCities">
         <img src="/logo.png" alt="Souzip Logo" class="h-12" />
       </div>
 
@@ -40,11 +40,17 @@
 
 <script setup>
 import { useAuth } from '@/composables/useAuth'
+import { useRouter } from 'vue-router'
 
 const emit = defineEmits(['toggleSidebar'])
+const router = useRouter()
 const { handleLogout } = useAuth()
 
 function onToggleSidebar() {
   emit('toggleSidebar')
+}
+
+function goToCities() {
+  router.push('/admin')
 }
 </script>

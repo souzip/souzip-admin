@@ -65,7 +65,7 @@
             </th>
             <th class="text-left">도시명</th>
             <th class="text-center w-28">우선순위</th>
-            <th class="text-center w-44">수정일</th>
+            <th class="text-center w-52">수정일</th>
           </tr>
         </thead>
         <tbody>
