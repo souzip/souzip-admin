@@ -23,11 +23,29 @@ client.interceptors.request.use((config) => {
 client.interceptors.response.use(
   (res) => res,
   async (error) => {
-    if (error?.response?.status !== 401) {
-      if (error?.response?.status === 403) {
-        const globalModal = useGlobalModal()
-        globalModal.showAlert('접근 권한이 없습니다.')
-      }
+    const auth = useAuthStore()
+    const status = error?.response?.status
+
+    // 403 에러 처리 - 접근 권한 없음
+    if (status === 403) {
+      const globalModal = useGlobalModal()
+
+      // 인증 정보 클리어
+      auth.clearAuth()
+
+      // 알림 표시
+      globalModal.showAlert('접근 권한이 없습니다. 다시 로그인해주세요.')
+
+      // 1.5초 후 로그인 페이지로 리다이렉트
+      setTimeout(() => {
+        window.location.href = '/admin/login'
+      }, 1500)
+
+      throw error
+    }
+
+    // 401이 아니면 에러 던지기
+    if (status !== 401) {
       throw error
     }
 
@@ -45,7 +63,6 @@ client.interceptors.response.use(
       throw error
     }
 
-    const auth = useAuthStore()
     if (!auth.refreshToken) {
       auth.clearAuth()
       window.location.href = '/admin/login'
