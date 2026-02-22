@@ -1,3 +1,9 @@
+# [1.5.0](https://github.com/souzip/souzip-admin/compare/v1.4.1...v1.5.0) (2026-02-22)
+
+### Features
+
+- 나라명 키워드 검색 구현 ([8bbb4a8](https://github.com/souzip/souzip-admin/commit/8bbb4a87980ff50ee95f6658c7d0d0fccf76724c))
+
 ## [1.4.1](https://github.com/souzip/souzip-admin/compare/v1.4.0...v1.4.1) (2026-02-22)
 
 ### Bug Fixes
