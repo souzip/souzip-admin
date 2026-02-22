@@ -1,6 +1,5 @@
 <template>
   <div class="cities-container">
-    <!-- 필터 바 -->
     <div class="filter-bar">
       <CustomSelect
         v-model="selectedCountryId"
@@ -49,7 +48,6 @@
       </div>
     </div>
 
-    <!-- 데스크톱 테이블 -->
     <div v-if="!isMobile" ref="scrollContainer" class="table-container" @scroll="handleScroll">
       <table class="data-table">
         <thead>
@@ -63,26 +61,28 @@
                 @change="toggleSelectAll"
               />
             </th>
-            <th class="text-left">도시명</th>
+            <th class="text-left">한글명</th>
+            <th class="text-left">영문명</th>
             <th class="text-center w-28">우선순위</th>
             <th class="text-center w-52">수정일</th>
+            <th v-if="canEdit" class="text-center w-20">편집</th>
           </tr>
         </thead>
         <tbody>
           <tr v-if="loading && items.length === 0">
-            <td :colspan="canEdit ? 4 : 3" class="loading-cell">
+            <td :colspan="canEdit ? 6 : 5" class="loading-cell">
               <div class="flex items-center justify-center gap-2 text-gray-500">
                 <span class="table-spinner"></span>불러오는 중
               </div>
             </td>
           </tr>
           <tr v-else-if="!loading && items.length === 0 && searchKeyword">
-            <td :colspan="canEdit ? 4 : 3" class="empty-cell">
+            <td :colspan="canEdit ? 6 : 5" class="empty-cell">
               '{{ searchKeyword }}'에 대한 검색 결과가 없습니다.
             </td>
           </tr>
           <tr v-else-if="!loading && items.length === 0">
-            <td :colspan="canEdit ? 4 : 3" class="empty-cell">등록된 도시가 없습니다.</td>
+            <td :colspan="canEdit ? 6 : 5" class="empty-cell">등록된 도시가 없습니다.</td>
           </tr>
           <template v-else>
             <tr
@@ -103,6 +103,7 @@
                 />
               </td>
               <td>{{ city.nameKr }}</td>
+              <td class="text-gray-600">{{ city.nameEn }}</td>
               <td class="text-center" @click.stop>
                 <div class="priority-wrap">
                   <input
@@ -129,9 +130,32 @@
                 </div>
               </td>
               <td class="text-center text-gray-500 text-xs">{{ formatDate(city.updatedAt) }}</td>
+              <td v-if="canEdit" class="text-center" @click.stop>
+                <button
+                  type="button"
+                  class="edit-icon"
+                  @click="openEditModal(city)"
+                  title="도시 이름 수정"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                  </svg>
+                </button>
+              </td>
             </tr>
             <tr v-if="loadingMore">
-              <td :colspan="canEdit ? 4 : 3" class="loading-more-cell">
+              <td :colspan="canEdit ? 6 : 5" class="loading-more-cell">
                 <div class="flex items-center justify-center gap-2">
                   <div class="loading-spinner"></div>
                   <span>불러오는 중...</span>
@@ -144,7 +168,6 @@
       <div ref="sentinel" class="sentinel"></div>
     </div>
 
-    <!-- 모바일 카드 -->
     <div v-else ref="scrollContainer" class="card-container" @scroll="handleScroll">
       <div v-if="loading && items.length === 0" class="loading-card">
         <span class="table-spinner"></span>불러오는 중
@@ -194,8 +217,22 @@
           </div>
           <div class="card-body">
             <div class="card-field">
-              <span class="card-label">도시명</span>
-              <span class="card-value">{{ city.nameKr }}</span>
+              <span class="card-label">한글명</span>
+              <div class="card-value-with-edit">
+                <span class="card-value">{{ city.nameKr }}</span>
+                <button
+                  v-if="canEdit"
+                  type="button"
+                  class="edit-icon-mobile"
+                  @click.stop="openEditModal(city)"
+                >
+                  수정
+                </button>
+              </div>
+            </div>
+            <div class="card-field">
+              <span class="card-label">영문명</span>
+              <span class="card-value">{{ city.nameEn }}</span>
             </div>
             <div class="card-field">
               <span class="card-label">수정일</span>
@@ -233,6 +270,12 @@
       @close="closeAddModal"
       @success="handleAddSuccess"
     />
+    <EditCityModal
+      :is-open="isEditModalOpen"
+      :city="editingCity"
+      @close="closeEditModal"
+      @success="handleEditSuccess"
+    />
     <ConfirmModal
       :is-open="confirmModal.isOpen"
       type="danger"
@@ -257,6 +300,7 @@ import { useDestination } from '@/composables/useDestination'
 import { useInfiniteScroll } from '@/composables/useInfiniteScroll'
 import CustomSelect from '@/components/CustomSelect.vue'
 import AddCityModal from '@/components/admin/AddCityModal.vue'
+import EditCityModal from '@/components/admin/EditCityModal.vue'
 import ConfirmModal from '@/components/ConfirmModal.vue'
 import AlertModal from '@/components/AlertModal.vue'
 
@@ -267,25 +311,28 @@ const vFocus = {
 }
 
 const auth = useAuthStore()
-// SUPER_ADMIN, ADMIN → CUD 가능 / VIEWER → R만
 const canEdit = computed(() => ['SUPER_ADMIN', 'ADMIN'].includes(auth.admin?.role))
 
-const { errorMessage, countries, getCountries, fetchCitiesPage, deleteCities, updateCityPriority } =
-  useDestination()
+const {
+  errorMessage,
+  countries,
+  getCountries,
+  fetchCitiesPage,
+  deleteCities,
+  updateCity,
+  updateCityPriority,
+} = useDestination()
 
-// ─── 반응형 분기 ─────────────────────────────────────────────────────
-const isMobile = ref(window.innerWidth <= 1024) // 600 → 1024로 변경
+const isMobile = ref(window.innerWidth <= 1024)
 const onResize = () => {
-  isMobile.value = window.innerWidth <= 1024 // 600 → 1024로 변경
+  isMobile.value = window.innerWidth <= 1024
 }
 
-// ─── 나라 / 검색 상태 ────────────────────────────────────────────────
 const countriesLoading = ref(false)
 const selectedCountryId = ref(null)
 const searchKeyword = ref('')
 const totalItems = ref(0)
 
-// ─── useInfiniteScroll 연결 ──────────────────────────────────────────
 function makeFetchFunction() {
   return async (page, pageSize) => {
     const res = await fetchCitiesPage(selectedCountryId.value, searchKeyword.value, page, pageSize)
@@ -309,7 +356,6 @@ const {
   fetchFunction: makeFetchFunction(),
 })
 
-// ─── 초기화 ─────────────────────────────────────────────────────────
 onMounted(async () => {
   window.addEventListener('resize', onResize)
   countriesLoading.value = true
@@ -351,7 +397,6 @@ function clearSearch() {
   resetAndLoad()
 }
 
-// ─── 선택 관리 ───────────────────────────────────────────────────────
 const selectedIds = ref([])
 const isAllSelected = computed(
   () => items.value.length > 0 && selectedIds.value.length === items.value.length
@@ -369,7 +414,6 @@ function toggleSelect(id) {
   else selectedIds.value.push(id)
 }
 
-// ─── 우선순위 인라인 편집 ────────────────────────────────────────────
 const editingPriorityId = ref(null)
 const editingPriorityValue = ref('')
 
@@ -402,7 +446,6 @@ async function savePriority(cityId) {
   }
 }
 
-// ─── 도시 등록 모달 ──────────────────────────────────────────────────
 const isAddModalOpen = ref(false)
 function openAddModal() {
   isAddModalOpen.value = true
@@ -416,7 +459,30 @@ async function handleAddSuccess() {
   await resetAndLoad()
 }
 
-// ─── 삭제 ─────────────────────────────────────────────────────────────
+const isEditModalOpen = ref(false)
+const editingCity = ref(null)
+
+function openEditModal(city) {
+  editingCity.value = city
+  isEditModalOpen.value = true
+}
+
+function closeEditModal() {
+  isEditModalOpen.value = false
+  editingCity.value = null
+}
+
+async function handleEditSuccess(data) {
+  try {
+    await updateCity(editingCity.value.id, data)
+    closeEditModal()
+    showAlert('도시 이름이 수정되었습니다.')
+    await resetAndLoad()
+  } catch {
+    showAlert(errorMessage.value || '도시 이름 수정에 실패했습니다.')
+  }
+}
+
 const deleting = ref(false)
 const confirmModal = reactive({ isOpen: false, message: '' })
 
@@ -444,7 +510,6 @@ async function handleDeleteConfirm() {
   }
 }
 
-// ─── 알림 ─────────────────────────────────────────────────────────────
 const alertModal = reactive({ isOpen: false, message: '' })
 function showAlert(msg) {
   alertModal.message = msg
@@ -454,7 +519,6 @@ function closeAlertModal() {
   alertModal.isOpen = false
 }
 
-// ─── 날짜 포맷 ────────────────────────────────────────────────────────
 function formatDate(dateString) {
   if (!dateString) return '-'
   const utc = dateString.endsWith('Z') ? dateString : dateString + 'Z'
@@ -510,7 +574,7 @@ function formatDate(dateString) {
   padding: 8px 28px 8px 10px;
   font-size: 13px;
   border: 1px solid #e5e7eb;
-  border-radius: 6px;
+  border-radius: 4px;
   outline: none;
   background: #fff;
   transition: border-color 0.15s;
@@ -588,6 +652,26 @@ function formatDate(dateString) {
   color: #6b7280;
   font-size: 13px;
 }
+
+.edit-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: none;
+  color: #9ca3af;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.15s;
+}
+
+.edit-icon:hover {
+  background: #f3f4f6;
+  color: #ff7738;
+}
+
 .priority-wrap {
   display: flex;
   justify-content: center;
@@ -622,7 +706,7 @@ function formatDate(dateString) {
   width: 72px;
   padding: 3px 8px;
   border: 1px solid #ff7738;
-  border-radius: 6px;
+  border-radius: 4px;
   font-size: 13px;
   text-align: center;
   outline: none;
@@ -719,6 +803,29 @@ function formatDate(dateString) {
   font-size: 13px;
   color: #1f2937;
 }
+
+.card-value-with-edit {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.edit-icon-mobile {
+  padding: 4px 10px;
+  font-size: 11px;
+  background: #f3f4f6;
+  color: #6b7280;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.edit-icon-mobile:hover {
+  background: #ff7738;
+  color: white;
+}
+
 .loading-card,
 .empty-card {
   display: flex;
@@ -736,7 +843,6 @@ function formatDate(dateString) {
   font-size: 13px;
 }
 
-/* 1024px 이하에서 모바일 레이아웃 적용 */
 @media (max-width: 1024px) {
   .filter-bar {
     flex-wrap: wrap;
