@@ -19,9 +19,26 @@
     <Teleport to="body">
       <Transition name="dropdown">
         <div v-if="isOpen" class="select-dropdown" :style="dropdownStyle">
+          <!-- 검색창 추가 -->
+          <div class="search-wrapper">
+            <input
+              ref="searchInputRef"
+              v-model="searchQuery"
+              type="text"
+              class="search-input"
+              placeholder="나라명 검색"
+              @click.stop
+              @keydown.esc="isOpen = false"
+            />
+          </div>
+
           <ul class="select-list" role="listbox">
+            <!-- 검색 결과 없음 -->
+            <li v-if="filteredOptions.length === 0" class="empty-option">검색 결과가 없습니다.</li>
+
+            <!-- 필터링된 옵션 표시 -->
             <li
-              v-for="option in options"
+              v-for="option in filteredOptions"
               :key="option[valueKey]"
               class="select-option"
               :class="{ selected: modelValue === option[valueKey] }"
@@ -54,7 +71,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
+import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
 
 const props = defineProps({
   modelValue: {
@@ -87,7 +104,9 @@ const emit = defineEmits(['update:modelValue', 'change'])
 
 const isOpen = ref(false)
 const containerRef = ref(null)
+const searchInputRef = ref(null)
 const dropdownStyle = ref({})
+const searchQuery = ref('')
 
 const selectedLabel = computed(() => {
   if (props.modelValue === null || props.modelValue === undefined) {
@@ -95,6 +114,19 @@ const selectedLabel = computed(() => {
   }
   const found = props.options.find((o) => o[props.valueKey] === props.modelValue)
   return found ? found[props.labelKey] : props.placeholder
+})
+
+// 필터링된 옵션
+const filteredOptions = computed(() => {
+  if (!searchQuery.value.trim()) {
+    return props.options
+  }
+
+  const query = searchQuery.value.toLowerCase()
+  return props.options.filter((option) => {
+    const label = option[props.labelKey]?.toLowerCase() || ''
+    return label.includes(query)
+  })
 })
 
 // 트리거 위치 기준으로 드롭다운 좌표 계산
@@ -113,32 +145,50 @@ function calcDropdownStyle() {
 async function toggleOpen() {
   if (props.disabled) return
   if (!isOpen.value) {
+    searchQuery.value = '' // 검색어 초기화
     calcDropdownStyle()
     await nextTick()
+    isOpen.value = true
+    // 검색창에 자동 포커스
+    await nextTick()
+    searchInputRef.value?.focus()
+  } else {
+    isOpen.value = false
   }
-  isOpen.value = !isOpen.value
 }
 
 function selectOption(option) {
   emit('update:modelValue', option[props.valueKey])
   emit('change', option[props.valueKey])
   isOpen.value = false
+  searchQuery.value = '' // 검색어 초기화
 }
 
 function handleOutsideClick(e) {
   if (containerRef.value && !containerRef.value.contains(e.target)) {
     isOpen.value = false
+    searchQuery.value = '' // 검색어 초기화
   }
 }
 
 function handleKeydown(e) {
-  if (e.key === 'Escape') isOpen.value = false
+  if (e.key === 'Escape') {
+    isOpen.value = false
+    searchQuery.value = '' // 검색어 초기화
+  }
 }
 
 // 스크롤/리사이즈 시 위치 재계산
 function handleScrollOrResize() {
   if (isOpen.value) calcDropdownStyle()
 }
+
+// isOpen이 닫힐 때 검색어 초기화
+watch(isOpen, (newValue) => {
+  if (!newValue) {
+    searchQuery.value = ''
+  }
+})
 
 onMounted(() => {
   document.addEventListener('mousedown', handleOutsideClick)
@@ -159,7 +209,7 @@ onUnmounted(() => {
 .custom-select {
   position: relative;
   display: inline-block;
-  min-width: 140px;
+  min-width: 240px;
   user-select: none;
 }
 
@@ -213,7 +263,7 @@ onUnmounted(() => {
   transform: rotate(180deg);
 }
 
-/* 드롭다운 - position은 JS로 주입, 여기선 스타일만 */
+/* 드롭다운 */
 .select-dropdown {
   background: #fff;
   border: 1px solid #e5e7eb;
@@ -222,6 +272,30 @@ onUnmounted(() => {
   overflow: hidden;
 }
 
+/* 검색창 영역 */
+.search-wrapper {
+  padding: 8px;
+  border-bottom: 1px solid #f3f4f6;
+  background: #fafafa;
+}
+
+.search-input {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.15s;
+  background: #fff;
+}
+
+.search-input:focus {
+  border-color: #ff7738;
+  box-shadow: 0 0 0 2px rgba(255, 119, 56, 0.1);
+}
+
+/* 옵션 리스트 */
 .select-list {
   max-height: 220px;
   overflow-y: auto;
@@ -273,6 +347,14 @@ onUnmounted(() => {
   height: 15px;
   color: #ff7738;
   flex-shrink: 0;
+}
+
+/* 검색 결과 없음 */
+.empty-option {
+  padding: 20px 12px;
+  text-align: center;
+  color: #9ca3af;
+  font-size: 13px;
 }
 
 /* 드롭다운 애니메이션 */
