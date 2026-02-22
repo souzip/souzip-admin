@@ -5,12 +5,17 @@ export function useDestination() {
   const loading = ref(false)
   const errorMessage = ref('')
 
-  // ─── 나라 목록 ────────────────────────────────────────────────────────
+  // ─── 나라 목록 (키워드 검색 지원) ────────────────────────────────────
   const countries = ref([])
 
-  async function getCountries() {
+  async function getCountries(keyword = null) {
     try {
-      const res = await client.get('/api/admin/countries')
+      const params = {}
+      if (keyword?.trim()) {
+        params.keyword = keyword.trim()
+      }
+
+      const res = await client.get('/api/admin/countries', { params })
       countries.value = res.data.data ?? []
       return countries.value
     } catch (err) {

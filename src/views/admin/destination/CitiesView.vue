@@ -274,9 +274,9 @@ const { errorMessage, countries, getCountries, fetchCitiesPage, deleteCities, up
   useDestination()
 
 // ─── 반응형 분기 ─────────────────────────────────────────────────────
-const isMobile = ref(window.innerWidth <= 600)
+const isMobile = ref(window.innerWidth <= 1024) // 600 → 1024로 변경
 const onResize = () => {
-  isMobile.value = window.innerWidth <= 600
+  isMobile.value = window.innerWidth <= 1024 // 600 → 1024로 변경
 }
 
 // ─── 나라 / 검색 상태 ────────────────────────────────────────────────
@@ -623,7 +623,7 @@ function formatDate(dateString) {
   padding: 3px 8px;
   border: 1px solid #ff7738;
   border-radius: 6px;
-  font-size: 13px; /* 데스크톱은 13px 유지 */
+  font-size: 13px;
   text-align: center;
   outline: none;
   box-shadow: 0 0 0 2px rgba(255, 119, 56, 0.2);
@@ -735,7 +735,9 @@ function formatDate(dateString) {
   color: #6b7280;
   font-size: 13px;
 }
-@media (max-width: 600px) {
+
+/* 1024px 이하에서 모바일 레이아웃 적용 */
+@media (max-width: 1024px) {
   .filter-bar {
     flex-wrap: wrap;
     padding: 8px 12px;
@@ -766,6 +768,7 @@ function formatDate(dateString) {
     font-size: 16px;
   }
 }
+
 @media (max-width: 350px) {
   .card-field {
     flex-direction: column;
