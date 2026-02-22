@@ -118,7 +118,7 @@
             class="w-full py-2.5 bg-primary-500 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
             :disabled="loading"
           >
-            <span v-if="loading">초대 중...</span>
+            <span v-if="loading">초대 중</span>
             <span v-else>초대하기</span>
           </button>
         </form>
