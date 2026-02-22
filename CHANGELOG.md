@@ -1,3 +1,9 @@
+## [1.4.1](https://github.com/souzip/souzip-admin/compare/v1.4.0...v1.4.1) (2026-02-22)
+
+### Bug Fixes
+
+- 접근 제한 수정 ([adea0c1](https://github.com/souzip/souzip-admin/commit/adea0c14a7da2c985d3e34c471874f5f9c0687d3))
+
 # [1.4.0](https://github.com/souzip/souzip-admin/compare/v1.3.0...v1.4.0) (2026-02-17)
 
 ### Features
