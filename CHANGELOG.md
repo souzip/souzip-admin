@@ -1,3 +1,9 @@
+# [1.6.0](https://github.com/souzip/souzip-admin/compare/v1.5.0...v1.6.0) (2026-02-22)
+
+### Features
+
+- 도시 이름 수정 구현 ([cc414d5](https://github.com/souzip/souzip-admin/commit/cc414d51ef413147f986349c26ce0aa4f1db1ecb))
+
 # [1.5.0](https://github.com/souzip/souzip-admin/compare/v1.4.1...v1.5.0) (2026-02-22)
 
 ### Features
