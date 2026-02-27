@@ -8,7 +8,7 @@
           class="px-4 py-2 bg-primary-500 text-white rounded transition-colors text-sm"
           @click="openInviteModal"
         >
-          신규 관리자 등록
+          관리자 등록
         </button>
         <button
           type="button"
