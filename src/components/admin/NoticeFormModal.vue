@@ -605,6 +605,41 @@ function onClose() {
   padding-top: 8px;
 }
 
+/* ─── 푸터 버튼 ─── */
+.btn-secondary,
+.btn-primary {
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  border: none;
+}
+
+.btn-secondary {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.btn-secondary:hover {
+  background: #e5e7eb;
+}
+
+.btn-primary {
+  background: #ff7738;
+  color: #fff;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #e66a32;
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .form-group {
   display: flex;
   flex-direction: column;
