@@ -39,7 +39,6 @@
             @click="handleDestinationClick"
           >
             <div class="flex items-center gap-2">
-              <!-- 지구본 아이콘 -->
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 class="h-5 w-5"
@@ -73,36 +72,7 @@
             </svg>
           </button>
 
-          <!-- 하위 메뉴 -->
           <div v-if="isDestinationOpen" class="nav-submenu">
-            <!-- 나라 관리 -->
-            <!--            <RouterLink
-              to="/admin/countries"
-              class="nav-item nav-subitem"
-              active-class="nav-subitem-active"
-              @click="onNavClick"
-            >
-              <div class="flex items-center gap-2">
-                &lt;!&ndash; 깃발 아이콘 &ndash;&gt;
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  class="h-4 w-4"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"
-                  />
-                </svg>
-                <span>나라 관리</span>
-              </div>
-            </RouterLink>-->
-
-            <!-- 도시 관리 -->
             <RouterLink
               to="/admin/cities"
               class="nav-item nav-subitem"
@@ -110,7 +80,6 @@
               @click="onNavClick"
             >
               <div class="flex items-center gap-2">
-                <!-- 건물 아이콘 -->
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   class="h-4 w-4"
@@ -131,6 +100,79 @@
           </div>
         </div>
 
+        <!-- 고객지원 (토글) -->
+        <div>
+          <button
+            type="button"
+            class="nav-toggle-button"
+            :class="{ active: isSupportActive }"
+            @click="handleSupportClick"
+          >
+            <div class="flex items-center gap-2">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-5 w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"
+                />
+              </svg>
+              <span>고객지원</span>
+            </div>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-4 w-4"
+              :class="{ 'rotate-90': isSupportOpen }"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 5l7 7-7 7"
+              />
+            </svg>
+          </button>
+
+          <div v-if="isSupportOpen" class="nav-submenu">
+            <!-- 공지사항 -->
+            <RouterLink
+              to="/admin/notices"
+              class="nav-item nav-subitem"
+              active-class="nav-subitem-active"
+              @click="onNavClick"
+            >
+              <div class="flex items-center gap-2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-4 w-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"
+                  />
+                </svg>
+                <span>공지사항</span>
+              </div>
+            </RouterLink>
+
+            <!-- 나중에 FAQ, 문의하기 등 여기에 추가 -->
+          </div>
+        </div>
+
         <!-- 관리자 관리 (SUPER_ADMIN만) -->
         <RouterLink
           v-if="isSuperAdmin"
@@ -140,7 +182,6 @@
           @click="onNavClick"
         >
           <div class="flex items-center gap-2">
-            <!-- 사용자 관리 아이콘 -->
             <svg
               xmlns="http://www.w3.org/2000/svg"
               class="h-5 w-5"
@@ -186,24 +227,19 @@ const route = useRoute()
 const router = useRouter()
 const auth = useAuthStore()
 const isAnimating = ref(false)
-const isDestinationOpen = ref(false) // 기본으로 닫힘
+const isDestinationOpen = ref(false)
+const isSupportOpen = ref(false)
 
-// SUPER_ADMIN 체크
-const isSuperAdmin = computed(() => {
-  return auth.admin?.role === 'SUPER_ADMIN'
+const isSuperAdmin = computed(() => auth.admin?.role === 'SUPER_ADMIN')
+
+const isDestinationActive = computed(() => route.path.includes('/admin/cities'))
+
+const isSupportActive = computed(() => {
+  return route.path.includes('/admin/notices')
+  // 나중에 추가: || route.path.includes('/admin/faq') || route.path.includes('/admin/inquiries')
 })
 
-// 여행지 관리 active 상태 체크
-const isDestinationActive = computed(() => {
-  return route.path.includes('/admin/cities') || route.path.includes('/admin/cities')
-})
-
-const openClass = computed(() => {
-  if (props.open) {
-    return 'translate-x-0'
-  }
-  return 'translate-x-full'
-})
+const openClass = computed(() => (props.open ? 'translate-x-0' : 'translate-x-full'))
 
 watch(
   () => props.open,
@@ -215,28 +251,27 @@ watch(
   }
 )
 
-// 경로에 따라 토글 상태 관리
 watch(
   () => route.path,
   (newPath) => {
-    if (newPath.includes('/admin/cities') || newPath.includes('/admin/cities')) {
-      // 여행지 관리 경로일 때 열기
-      isDestinationOpen.value = true
-    } else {
-      // 다른 경로일 때 닫기
-      isDestinationOpen.value = false
-    }
+    isDestinationOpen.value = newPath.includes('/admin/cities')
+    isSupportOpen.value = newPath.includes('/admin/notices')
+    // 나중에 추가: || newPath.includes('/admin/faq') || newPath.includes('/admin/inquiries')
   },
   { immediate: true }
 )
 
 function handleDestinationClick() {
-  // 토글
   isDestinationOpen.value = !isDestinationOpen.value
-
-  // 데스크탑(md 이상)에서만 나라 관리로 이동
   if (window.innerWidth >= 768) {
     router.push('/admin/cities')
+  }
+}
+
+function handleSupportClick() {
+  isSupportOpen.value = !isSupportOpen.value
+  if (window.innerWidth >= 768) {
+    router.push('/admin/notices')
   }
 }
 
@@ -315,7 +350,7 @@ function onLogout() {
 .nav-active:hover {
   background: rgba(255, 119, 56, 0.14);
 }
-/* 하위 메뉴용 스타일 (배경 없이 텍스트 색상만, 작은 크기) */
+
 .nav-subitem {
   background: transparent;
   font-size: 13px;

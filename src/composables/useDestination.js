@@ -1,9 +1,54 @@
-import { ref } from 'vue'
+import { ref, reactive } from 'vue'
 import client from '@/api/Client'
 
 export function useDestination() {
   const errorMessage = ref('')
+  const loading = ref(false)
   const countries = ref([])
+
+  const cityForm = reactive({
+    countryId: null,
+    nameKr: '',
+    nameEn: '',
+    latitude: '',
+    longitude: '',
+  })
+
+  const cityFormError = ref('')
+
+  function resetCityForm() {
+    cityForm.countryId = null
+    cityForm.nameKr = ''
+    cityForm.nameEn = ''
+    cityForm.latitude = ''
+    cityForm.longitude = ''
+    cityFormError.value = ''
+  }
+
+  function validateCityForm() {
+    cityFormError.value = ''
+    if (!cityForm.countryId) {
+      cityFormError.value = '나라를 선택해주세요.'
+      return false
+    }
+    if (!cityForm.nameKr.trim()) {
+      cityFormError.value = '한글 도시명을 입력해주세요.'
+      return false
+    }
+    if (!cityForm.nameEn.trim()) {
+      cityFormError.value = '영문 도시명을 입력해주세요.'
+      return false
+    }
+    if (!cityForm.latitude) {
+      cityFormError.value = '위도를 입력해주세요.'
+      return false
+    }
+    if (!cityForm.longitude) {
+      cityFormError.value = '경도를 입력해주세요.'
+      return false
+    }
+    return true
+  }
 
   async function getCountries(keyword = null) {
     try {
@@ -29,9 +74,23 @@ export function useDestination() {
     return res.data.data
   }
 
-  async function createCity(data) {
-    const res = await client.post('/api/admin/cities', data)
-    return res.data
+  async function createCity() {
+    loading.value = true
+    try {
+      const res = await client.post('/api/admin/cities', {
+        countryId: cityForm.countryId,
+        nameKr: cityForm.nameKr.trim(),
+        nameEn: cityForm.nameEn.trim(),
+        latitude: Number(cityForm.latitude),
+        longitude: Number(cityForm.longitude),
+      })
+      return res.data
+    } catch (err) {
+      cityFormError.value = err?.response?.data?.message || '도시 등록에 실패했습니다.'
+      throw err
+    } finally {
+      loading.value = false
+    }
   }
 
   async function updateCity(cityId, data) {
@@ -54,12 +113,17 @@ export function useDestination() {
 
   return {
     errorMessage,
+    loading,
     countries,
+    cityForm,
+    cityFormError,
     getCountries,
     fetchCitiesPage,
     createCity,
     updateCity,
     deleteCities,
     updateCityPriority,
+    validateCityForm,
+    resetCityForm,
   }
 }

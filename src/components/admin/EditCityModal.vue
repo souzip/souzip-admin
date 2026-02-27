@@ -40,7 +40,7 @@
               :disabled="loading || !isFormValid"
               @click="handleSubmit"
             >
-              {{ loading ? '저장 중...' : '저장' }}
+              {{ loading ? '저장 중' : '저장' }}
             </button>
           </div>
         </div>
