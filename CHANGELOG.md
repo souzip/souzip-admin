@@ -1,3 +1,14 @@
+# [1.7.0](https://github.com/souzip/souzip-admin/compare/v1.6.0...v1.7.0) (2026-02-27)
+
+### Bug Fixes
+
+- 도시 버그 수정 ([449a926](https://github.com/souzip/souzip-admin/commit/449a9265926571e102dee552d2c4e363d2875ed9))
+
+### Features
+
+- 수정 ([313e124](https://github.com/souzip/souzip-admin/commit/313e12407d303900a1cbde56aea2fffc14aea033))
+- 수정 ([f5c3550](https://github.com/souzip/souzip-admin/commit/f5c3550468a64a4fc37d9c1361796f56fecabec4))
+
 # [1.6.0](https://github.com/souzip/souzip-admin/compare/v1.5.0...v1.6.0) (2026-02-22)
 
 ### Features
