@@ -1,4 +1,3 @@
-<!-- src/components/admin/NoticeFormModal.vue -->
 <template>
   <Teleport to="body">
     <Transition name="modal">
@@ -42,15 +41,29 @@
               <p v-if="errors.title" class="error-text">{{ errors.title }}</p>
             </div>
 
+            <!-- 공개 여부 -->
+            <div class="form-group">
+              <label class="label-base">공개 여부</label>
+              <div class="toggle-wrap">
+                <button
+                  type="button"
+                  class="toggle-btn"
+                  :class="form.visible ? 'toggle-on' : 'toggle-off'"
+                  @click="form.visible = !form.visible"
+                >
+                  <span class="toggle-knob"></span>
+                </button>
+                <span class="toggle-label">{{ form.visible ? '공개' : '숨김' }}</span>
+              </div>
+            </div>
+
             <!-- 본문 에디터 -->
             <div class="form-group">
               <label class="label-base">내용 <span class="text-red-500">*</span></label>
 
-              <!-- 툴바 + 에디터 컨테이너 -->
               <div class="editor-container" :class="{ 'editor-container-error': errors.content }">
                 <!-- 툴바 -->
                 <div class="editor-toolbar">
-                  <!-- 텍스트 스타일 -->
                   <button
                     type="button"
                     class="toolbar-btn"
@@ -80,7 +93,6 @@
                   </button>
                   <div class="toolbar-divider"></div>
 
-                  <!-- 제목 -->
                   <button
                     type="button"
                     class="toolbar-btn"
@@ -101,7 +113,6 @@
                   </button>
                   <div class="toolbar-divider"></div>
 
-                  <!-- 정렬 -->
                   <button
                     type="button"
                     class="toolbar-btn"
@@ -170,7 +181,6 @@
                   </button>
                   <div class="toolbar-divider"></div>
 
-                  <!-- 목록 -->
                   <button
                     type="button"
                     class="toolbar-btn"
@@ -191,7 +201,6 @@
                   </button>
                   <div class="toolbar-divider"></div>
 
-                  <!-- 기타 -->
                   <button
                     type="button"
                     class="toolbar-btn"
@@ -211,7 +220,6 @@
                   </button>
                   <div class="toolbar-divider"></div>
 
-                  <!-- 링크 -->
                   <button
                     type="button"
                     class="toolbar-btn"
@@ -235,7 +243,6 @@
                     </svg>
                   </button>
 
-                  <!-- 이미지 삽입 -->
                   <label class="toolbar-btn" title="이미지 삽입" style="cursor: pointer">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -319,15 +326,14 @@ const emit = defineEmits(['close', 'success'])
 const { createNotice, updateNotice } = useNoticeManagement()
 
 const isEdit = computed(() => !!props.notice)
-const form = reactive({ title: '' })
+const form = reactive({ title: '', visible: true })
 const errors = reactive({ title: '', content: '' })
 const submitting = ref(false)
 const imageInput = ref(null)
 const linkInputRef = ref(null)
-
 const linkPopup = reactive({ visible: false, url: '' })
 
-// ─── 에디터 안에서 이미지를 칩으로 보여주는 컴포넌트 ───
+// ─── ImageChip 컴포넌트 ───
 const ImageChip = defineComponent({
   props: { node: Object },
   setup(props) {
@@ -395,10 +401,7 @@ const ImageChipExtension = Node.create({
       setImage:
         (options) =>
         ({ commands }) => {
-          return commands.insertContent({
-            type: this.name,
-            attrs: options,
-          })
+          return commands.insertContent({ type: this.name, attrs: options })
         },
     }
   },
@@ -416,15 +419,9 @@ const editor = useEditor({
     Placeholder.configure({ placeholder: '내용을 입력하세요' }),
     Link.configure({
       openOnClick: false,
-      HTMLAttributes: {
-        class: 'notice-link',
-        target: '_blank',
-        rel: 'noopener noreferrer',
-      },
+      HTMLAttributes: { class: 'notice-link', target: '_blank', rel: 'noopener noreferrer' },
     }),
-    TextAlign.configure({
-      types: ['heading', 'paragraph'],
-    }),
+    TextAlign.configure({ types: ['heading', 'paragraph'] }),
   ],
   content: '',
 })
@@ -434,6 +431,7 @@ watch(
   (open) => {
     if (open) {
       form.title = props.notice?.title ?? ''
+      form.visible = props.notice?.visible ?? true
       editor.value?.commands.setContent(props.notice?.content ?? '')
       errors.title = ''
       errors.content = ''
@@ -447,7 +445,6 @@ onBeforeUnmount(() => {
   editor.value?.destroy()
 })
 
-// 이미지 삽입
 function handleImageInsert(event) {
   const file = event.target.files?.[0]
   if (!file) return
@@ -459,7 +456,6 @@ function handleImageInsert(event) {
   event.target.value = ''
 }
 
-// 링크
 async function handleLinkClick() {
   if (editor.value?.isActive('link')) {
     editor.value?.chain().focus().unsetLink().run()
@@ -514,6 +510,7 @@ async function handleSubmit() {
   const payload = {
     title: form.title.trim(),
     content: editor.value?.getHTML() ?? '',
+    visible: form.visible,
   }
 
   try {
@@ -548,6 +545,7 @@ function onClose() {
   justify-content: center;
   padding: 16px;
 }
+
 .modal-box {
   background: #fff;
   border-radius: 12px;
@@ -558,6 +556,7 @@ function onClose() {
   display: flex;
   flex-direction: column;
 }
+
 .modal-header {
   display: flex;
   align-items: center;
@@ -570,43 +569,99 @@ function onClose() {
   background: #fff;
   z-index: 1;
 }
+
 .modal-title {
   font-size: 16px;
   font-weight: 600;
   color: #111827;
 }
+
 .modal-close-btn {
   padding: 4px;
   border-radius: 6px;
   color: #6b7280;
   transition: background 0.15s;
 }
+
 .modal-close-btn:hover {
   background: #f3f4f6;
 }
+
 .modal-body {
   padding: 20px 24px;
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
+
 .modal-body > .form-group:first-child {
   margin-top: 4px;
 }
+
 .modal-footer {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
   padding-top: 8px;
 }
+
 .form-group {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
+
 .error-text {
   font-size: 12px;
   color: #ef4444;
+}
+
+/* 토글 */
+.toggle-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.toggle-btn {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  border-radius: 12px;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+
+.toggle-on {
+  background: #ff7738;
+}
+
+.toggle-off {
+  background: #d1d5db;
+}
+
+.toggle-knob {
+  position: absolute;
+  top: 3px;
+  width: 18px;
+  height: 18px;
+  background: #fff;
+  border-radius: 50%;
+  transition: left 0.2s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.toggle-on .toggle-knob {
+  left: 23px;
+}
+
+.toggle-off .toggle-knob {
+  left: 3px;
+}
+
+.toggle-label {
+  font-size: 13px;
+  color: #374151;
 }
 
 /* 에디터 컨테이너 */
@@ -618,10 +673,12 @@ function onClose() {
     border-color 0.15s,
     box-shadow 0.15s;
 }
+
 .editor-container:focus-within {
   border-color: #ff7738;
   box-shadow: 0 0 0 3px rgba(255, 119, 56, 0.1);
 }
+
 .editor-container-error {
   border-color: #f87171;
 }
@@ -636,6 +693,7 @@ function onClose() {
   background: #f9fafb;
   border-bottom: 1px solid #e5e7eb;
 }
+
 .toolbar-btn {
   display: inline-flex;
   align-items: center;
@@ -650,13 +708,16 @@ function onClose() {
   transition: background 0.15s;
   user-select: none;
 }
+
 .toolbar-btn:hover {
   background: #e5e7eb;
 }
+
 .toolbar-btn.active {
   background: rgba(255, 119, 56, 0.15);
   color: rgba(255, 119, 56, 1);
 }
+
 .toolbar-divider {
   width: 1px;
   height: 18px;
@@ -673,6 +734,7 @@ function onClose() {
   background: #f9fafb;
   border-bottom: 1px solid #e5e7eb;
 }
+
 .link-input {
   flex: 1;
   padding: 5px 10px;
@@ -682,10 +744,12 @@ function onClose() {
   outline: none;
   color: #1f2937;
 }
+
 .link-input:focus {
   border-color: #ff7738;
   box-shadow: 0 0 0 2px rgba(255, 119, 56, 0.1);
 }
+
 .link-apply-btn {
   padding: 5px 12px;
   font-size: 12px;
@@ -696,9 +760,11 @@ function onClose() {
   cursor: pointer;
   transition: background 0.15s;
 }
+
 .link-apply-btn:hover {
   background: #e8642a;
 }
+
 .link-cancel-btn {
   padding: 5px 12px;
   font-size: 12px;
@@ -709,6 +775,7 @@ function onClose() {
   cursor: pointer;
   transition: background 0.15s;
 }
+
 .link-cancel-btn:hover {
   background: #e5e7eb;
 }
@@ -723,6 +790,7 @@ function onClose() {
 .modal-leave-active {
   transition: opacity 0.2s ease;
 }
+
 .modal-enter-from,
 .modal-leave-to {
   opacity: 0;
@@ -738,47 +806,57 @@ function onClose() {
   line-height: 1.7;
   color: #1f2937;
 }
+
 .editor-content .ProseMirror h2 {
   font-size: 20px;
   font-weight: 700;
   margin: 16px 0 8px;
 }
+
 .editor-content .ProseMirror h3 {
   font-size: 17px;
   font-weight: 600;
   margin: 14px 0 6px;
 }
+
 .editor-content .ProseMirror p {
   margin: 0 0 8px;
 }
+
 .editor-content .ProseMirror ul {
   padding-left: 20px;
   margin: 0 0 8px;
   list-style-type: disc;
 }
+
 .editor-content .ProseMirror ol {
   padding-left: 20px;
   margin: 0 0 8px;
   list-style-type: decimal;
 }
+
 .editor-content .ProseMirror ul li::marker,
 .editor-content .ProseMirror ol li::marker {
   color: #1f2937;
 }
+
 .editor-content .ProseMirror li {
   margin-bottom: 4px;
 }
+
 .editor-content .ProseMirror blockquote {
   border-left: 3px solid #e5e7eb;
   padding-left: 12px;
   color: #6b7280;
   margin: 8px 0;
 }
+
 .editor-content .ProseMirror hr {
   border: none;
   border-top: 1px solid #e5e7eb;
   margin: 16px 0;
 }
+
 .editor-content .ProseMirror p.is-editor-empty:first-child::before {
   content: attr(data-placeholder);
   float: left;
@@ -786,11 +864,13 @@ function onClose() {
   pointer-events: none;
   height: 0;
 }
+
 .editor-content .ProseMirror a.notice-link {
   color: #2563eb;
   text-decoration: underline;
   cursor: pointer;
 }
+
 .editor-content .ProseMirror a.notice-link:hover {
   color: #1d4ed8;
 }
