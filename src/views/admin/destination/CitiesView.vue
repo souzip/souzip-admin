@@ -158,7 +158,7 @@
               <td :colspan="canEdit ? 6 : 5" class="loading-more-cell">
                 <div class="flex items-center justify-center gap-2">
                   <div class="loading-spinner"></div>
-                  <span>불러오는 중...</span>
+                  <span>불러오는 중</span>
                 </div>
               </td>
             </tr>
@@ -617,6 +617,7 @@ function formatDate(dateString) {
   font-weight: 600;
   color: #374151;
   border-bottom: 1px solid #e5e7eb;
+  vertical-align: middle;
 }
 .data-table tbody tr {
   border-bottom: 1px solid #f3f4f6;
@@ -629,6 +630,13 @@ function formatDate(dateString) {
   padding: 11px 16px;
   font-size: 13px;
   color: #1f2937;
+  vertical-align: middle;
+}
+.data-table input[type='checkbox'] {
+  width: 14px !important;
+  height: 14px !important;
+  cursor: pointer;
+  display: flex;
 }
 .row-clickable {
   cursor: pointer;
