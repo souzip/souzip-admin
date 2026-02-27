@@ -9,7 +9,7 @@
     <div
       class="animate-spin rounded-full h-16 w-16 border-4 border-gray-300 border-t-primary-500"
     ></div>
-    <span class="sr-only">Loading...</span>
+    <span class="sr-only">Loading</span>
   </div>
 </template>
 

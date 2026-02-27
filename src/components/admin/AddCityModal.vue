@@ -115,7 +115,7 @@
             >
               <span v-if="loading" class="flex items-center justify-center gap-2">
                 <span class="btn-spinner"></span>
-                등록 중...
+                등록 중
               </span>
               <span v-else>등록</span>
             </button>

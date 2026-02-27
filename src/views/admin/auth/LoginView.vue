@@ -37,7 +37,7 @@
         </p>
 
         <button type="submit" class="btn-primary w-full" :disabled="loading">
-          {{ loading ? '로그인 중...' : '로그인' }}
+          {{ loading ? '로그인 중' : '로그인' }}
         </button>
       </form>
     </div>

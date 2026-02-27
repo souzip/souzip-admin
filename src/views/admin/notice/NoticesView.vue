@@ -1,14 +1,15 @@
+<!-- src/views/admin/notice/NoticesView.vue -->
 <template>
-  <div class="admin-management-container">
-    <!-- 액션 바 (슈퍼관리자만) -->
-    <div class="action-bar">
+  <div class="notices-container">
+    <!-- 액션 바 -->
+    <div v-if="canEdit" class="action-bar">
       <div class="action-buttons">
         <button
           type="button"
           class="px-4 py-2 bg-primary-500 text-white rounded transition-colors text-sm"
-          @click="openInviteModal"
+          @click="openCreateModal"
         >
-          관리자 등록
+          공지사항 등록
         </button>
         <button
           type="button"
@@ -33,7 +34,7 @@
       <table class="data-table">
         <thead>
           <tr>
-            <th class="w-12">
+            <th v-if="canEdit" class="col-check">
               <input
                 type="checkbox"
                 class="rounded border-gray-300"
@@ -41,51 +42,50 @@
                 @change="toggleSelectAll"
               />
             </th>
-            <th>아이디</th>
-            <th>역할</th>
-            <th>마지막 로그인</th>
+            <th class="col-title">제목</th>
+            <th class="col-status">상태</th>
+            <th class="col-author">작성자</th>
+            <th class="col-date">작성일</th>
+            <th class="col-date">수정일</th>
           </tr>
         </thead>
         <tbody>
           <tr v-if="loading && items.length === 0">
-            <td colspan="4" class="loading-cell">로딩 중</td>
+            <td :colspan="canEdit ? 6 : 5" class="loading-cell">로딩 중</td>
           </tr>
           <tr v-else-if="!loading && items.length === 0">
-            <td colspan="4" class="empty-cell">등록된 관리자가 없습니다.</td>
+            <td :colspan="canEdit ? 6 : 5" class="empty-cell">등록된 공지사항이 없습니다.</td>
           </tr>
           <template v-else>
             <tr
-              v-for="admin in items"
-              :key="admin.id"
-              class="row-clickable"
-              :class="{ 'row-selected': selectedIds.includes(admin.id) }"
-              @click="toggleSelect(admin.id)"
+              v-for="notice in items"
+              :key="notice.id"
+              :class="['row-clickable', { 'row-selected': selectedIds.includes(notice.id) }]"
+              @click="handleRowClick(notice)"
             >
-              <td class="text-center" @click.stop>
+              <td v-if="canEdit" class="text-center" @click.stop>
                 <input
                   type="checkbox"
                   class="rounded border-gray-300"
-                  :checked="selectedIds.includes(admin.id)"
-                  @change="toggleSelect(admin.id)"
+                  :checked="selectedIds.includes(notice.id)"
+                  @change="toggleSelect(notice.id)"
                 />
               </td>
-              <td class="text-center">{{ admin.username }}</td>
+              <td class="col-title-cell">{{ notice.title }}</td>
               <td class="text-center">
                 <span
-                  class="role-badge"
-                  :class="{
-                    'role-super': admin.role === 'SUPER_ADMIN',
-                    'role-admin': admin.role === 'ADMIN',
-                    'role-viewer': admin.role === 'VIEWER',
-                  }"
+                  class="status-badge"
+                  :class="notice.visible !== false ? 'status-public' : 'status-hidden'"
                 >
-                  {{ admin.role }}
+                  {{ notice.visible !== false ? '공개' : '숨김' }}
                 </span>
               </td>
-              <td class="text-center">{{ formatDate(admin.lastLoginAt) }}</td>
+              <td class="text-center">{{ formatAuthor(notice.author) }}</td>
+              <td class="text-center whitespace-nowrap">{{ formatDate(notice.createdAt) }}</td>
+              <td class="text-center whitespace-nowrap">{{ formatDate(notice.updatedAt) }}</td>
             </tr>
             <tr v-if="loadingMore">
-              <td colspan="4" class="loading-more-cell">
+              <td :colspan="canEdit ? 6 : 5" class="loading-more-cell">
                 <div class="flex items-center justify-center gap-2">
                   <div class="loading-spinner"></div>
                   <span>추가 데이터 로딩 중</span>
@@ -102,43 +102,47 @@
     <div v-else ref="scrollContainer" class="card-container" @scroll="handleScroll">
       <div v-if="loading && items.length === 0" class="loading-card">로딩 중</div>
       <div v-else-if="!loading && items.length === 0" class="empty-card">
-        등록된 관리자가 없습니다.
+        등록된 공지사항이 없습니다.
       </div>
       <template v-else>
         <div
-          v-for="admin in items"
-          :key="admin.id"
-          class="admin-card card-clickable"
-          :class="{ 'card-selected': selectedIds.includes(admin.id) }"
-          @click="toggleSelect(admin.id)"
+          v-for="notice in items"
+          :key="notice.id"
+          class="notice-card card-clickable"
+          :class="{ 'card-selected': selectedIds.includes(notice.id) }"
+          @click="handleRowClick(notice)"
         >
-          <div class="card-header">
+          <div v-if="canEdit" class="card-header">
             <input
               type="checkbox"
               class="rounded border-gray-300"
-              :checked="selectedIds.includes(admin.id)"
+              :checked="selectedIds.includes(notice.id)"
               @click.stop
-              @change="toggleSelect(admin.id)"
+              @change="toggleSelect(notice.id)"
             />
             <span
-              class="role-badge"
-              :class="{
-                'role-super': admin.role === 'SUPER_ADMIN',
-                'role-admin': admin.role === 'ADMIN',
-                'role-viewer': admin.role === 'VIEWER',
-              }"
+              class="status-badge"
+              :class="notice.visible !== false ? 'status-public' : 'status-hidden'"
             >
-              {{ admin.role }}
+              {{ notice.visible !== false ? '공개' : '숨김' }}
             </span>
           </div>
           <div class="card-body">
             <div class="card-field">
-              <span class="card-label">아이디</span>
-              <span class="card-value">{{ admin.username }}</span>
+              <span class="card-label">제목</span>
+              <span class="card-value notice-title">{{ notice.title }}</span>
             </div>
             <div class="card-field">
-              <span class="card-label">마지막 로그인</span>
-              <span class="card-value">{{ formatDate(admin.lastLoginAt) }}</span>
+              <span class="card-label">작성자</span>
+              <span class="card-value">{{ formatAuthor(notice.author) }}</span>
+            </div>
+            <div class="card-field">
+              <span class="card-label">작성일</span>
+              <span class="card-value">{{ formatDate(notice.createdAt) }}</span>
+            </div>
+            <div class="card-field">
+              <span class="card-label">수정일</span>
+              <span class="card-value">{{ formatDate(notice.updatedAt) }}</span>
             </div>
           </div>
         </div>
@@ -152,10 +156,12 @@
       <div ref="sentinel" class="sentinel"></div>
     </div>
 
-    <InviteAdminModal
-      :is-open="isModalOpen"
-      @close="closeInviteModal"
-      @success="handleInviteSuccess"
+    <!-- 모달들 -->
+    <NoticeFormModal
+      :is-open="formModal.isOpen"
+      :notice="formModal.notice"
+      @close="closeFormModal"
+      @success="handleFormSuccess"
     />
     <ConfirmModal
       :is-open="confirmModal.isOpen"
@@ -175,38 +181,26 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, reactive, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, computed, onMounted, onUnmounted, reactive } from 'vue'
 import { useAuthStore } from '@/stores/auth'
-import { useAdminManagement } from '@/composables/useAdminManagement'
+import { useNoticeManagement } from '@/composables/useNoticeManagement'
 import { useInfiniteScroll } from '@/composables/useInfiniteScroll'
-import InviteAdminModal from '@/components/admin/InviteAdminModal.vue'
+import NoticeFormModal from '@/components/admin/NoticeFormModal.vue'
 import ConfirmModal from '@/components/ConfirmModal.vue'
 import AlertModal from '@/components/AlertModal.vue'
 
-const router = useRouter()
 const auth = useAuthStore()
-const { getAdmins, deleteAdmins } = useAdminManagement()
+const { getNotices, deleteNotices } = useNoticeManagement()
 
 const isMobile = ref(window.innerWidth <= 600)
 const onResize = () => {
   isMobile.value = window.innerWidth <= 600
 }
 
-const isSuperAdmin = computed(() => auth.admin?.role === 'SUPER_ADMIN')
-
-// superAdmin 아니면 로그인으로 리다이렉트
-function checkPermission() {
-  if (!auth.admin) {
-    router.replace('/admin/login')
-    return false
-  }
-  if (!isSuperAdmin.value) {
-    router.replace('/admin/login')
-    return false
-  }
-  return true
-}
+const canEdit = computed(() => {
+  const role = auth.admin?.role
+  return role === 'SUPER_ADMIN' || role === 'ADMIN'
+})
 
 const {
   loading,
@@ -218,38 +212,54 @@ const {
   resetAndLoad,
   initialize,
   cleanup,
-} = useInfiniteScroll({
-  pageSize: 20,
-  fetchFunction: getAdmins,
-})
+} = useInfiniteScroll({ pageSize: 20, fetchFunction: getNotices })
 
-const isModalOpen = ref(false)
-function openInviteModal() {
-  isModalOpen.value = true
+const formModal = reactive({ isOpen: false, notice: null })
+
+function openCreateModal() {
+  formModal.notice = null
+  formModal.isOpen = true
 }
-function closeInviteModal() {
-  isModalOpen.value = false
+
+function openEditModal(notice) {
+  formModal.notice = notice
+  formModal.isOpen = true
 }
-function handleInviteSuccess() {
-  showAlert('관리자 초대가 완료되었습니다.')
+
+function closeFormModal() {
+  formModal.isOpen = false
+}
+
+function handleFormSuccess(type) {
+  closeFormModal()
+  showAlert(type === 'update' ? '공지사항이 수정되었습니다.' : '공지사항이 등록되었습니다.')
   resetAndLoad()
 }
 
+function handleRowClick(notice) {
+  if (!canEdit.value) return
+  openEditModal(notice)
+}
+
 const confirmModal = reactive({ isOpen: false, message: '' })
+
 function openDeleteConfirm() {
   if (selectedIds.value.length === 0) return
-  confirmModal.message = `선택한 ${selectedIds.value.length}명의 관리자를 삭제하시겠습니까?`
+  confirmModal.message = `선택한 ${selectedIds.value.length}건의 공지사항을 삭제하시겠습니까?`
   confirmModal.isOpen = true
 }
+
 function closeDeleteConfirm() {
   confirmModal.isOpen = false
 }
 
 const alertModal = reactive({ isOpen: false, message: '' })
+
 function showAlert(message) {
   alertModal.message = message
   alertModal.isOpen = true
 }
+
 function closeAlertModal() {
   alertModal.isOpen = false
 }
@@ -258,9 +268,11 @@ const selectedIds = ref([])
 const isAllSelected = computed(
   () => items.value.length > 0 && selectedIds.value.length === items.value.length
 )
+
 function toggleSelectAll(event) {
-  selectedIds.value = event.target.checked ? items.value.map((a) => a.id) : []
+  selectedIds.value = event.target.checked ? items.value.map((n) => n.id) : []
 }
+
 function toggleSelect(id) {
   const index = selectedIds.value.indexOf(id)
   if (index > -1) selectedIds.value.splice(index, 1)
@@ -268,20 +280,27 @@ function toggleSelect(id) {
 }
 
 const deleting = ref(false)
+
 async function handleDeleteConfirm() {
   closeDeleteConfirm()
   deleting.value = true
   try {
-    const result = await deleteAdmins(selectedIds.value)
-    showAlert(`${result.count}명의 관리자가 삭제되었습니다.`)
+    const result = await deleteNotices(selectedIds.value)
+    showAlert(`${result.count}건의 공지사항이 삭제되었습니다.`)
     selectedIds.value = []
     resetAndLoad()
   } catch (error) {
-    const message = error?.response?.data?.message || '관리자 삭제에 실패했습니다.'
+    const message = error?.response?.data?.message || '공지사항 삭제에 실패했습니다.'
     showAlert(message)
   } finally {
     deleting.value = false
   }
+}
+
+function formatAuthor(author) {
+  if (!author) return '-'
+  if (typeof author === 'object') return author.username ?? '-'
+  return author
 }
 
 function formatDate(dateString) {
@@ -297,17 +316,8 @@ function formatDate(dateString) {
   })
 }
 
-watch(
-  () => auth.admin,
-  () => {
-    checkPermission()
-  },
-  { immediate: false }
-)
-
 onMounted(() => {
   window.addEventListener('resize', onResize)
-  if (!checkPermission()) return
   initialize()
 })
 
@@ -318,13 +328,14 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.admin-management-container {
+.notices-container {
   height: calc(100vh - 64px);
   display: flex;
   flex-direction: column;
   background: #fff;
   overflow: hidden;
 }
+
 .action-bar {
   display: flex;
   justify-content: flex-end;
@@ -333,27 +344,36 @@ onUnmounted(() => {
   border-bottom: 1px solid #f3f4f6;
   background: #fafafa;
   flex-shrink: 0;
-  margin-bottom: 0 !important;
 }
+
 .action-buttons {
   display: flex;
   gap: 8px;
 }
+
 .table-container {
   flex: 1;
   overflow-y: auto;
   min-height: 0;
 }
+
 .data-table {
   width: 100%;
   border-collapse: collapse;
 }
+
 .data-table thead {
   position: sticky;
   top: 0;
   background: #f9fafb;
   z-index: 10;
 }
+
+.data-table th,
+.data-table td {
+  vertical-align: middle;
+}
+
 .data-table th {
   padding: 10px 16px;
   text-align: center;
@@ -362,46 +382,109 @@ onUnmounted(() => {
   color: #374151;
   border-bottom: 1px solid #e5e7eb;
 }
+
 .data-table tbody tr {
   border-bottom: 1px solid #f3f4f6;
   transition: background 0.1s;
 }
+
 .data-table tbody tr:hover {
   background: #f9fafb;
 }
+
 .data-table td {
   padding: 12px 16px;
   font-size: 13px;
   color: #1f2937;
 }
+
+.data-table input[type='checkbox'] {
+  width: 14px !important;
+  height: 14px !important;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.col-check {
+  width: 48px;
+}
+
+.col-title {
+  text-align: left !important;
+  width: 35%;
+}
+
+.col-title-cell {
+  text-align: left;
+}
+
+.col-status {
+  width: 80px;
+}
+
+.col-author {
+  width: 120px;
+}
+
+.col-date {
+  width: 160px;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.status-public {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.status-hidden {
+  background: #f3f4f6;
+  color: #9ca3af;
+}
+
 .row-clickable {
   cursor: pointer;
 }
+
 .row-selected {
   background: #fff5f0 !important;
 }
+
 .row-selected:hover {
   background: #ffe8dc !important;
 }
+
 .loading-cell,
 .empty-cell {
   padding: 60px 16px;
   text-align: center;
   color: #6b7280;
 }
+
 .loading-more-cell {
   padding: 20px 16px;
   text-align: center;
   color: #6b7280;
   font-size: 13px;
 }
+
 .card-container {
   flex: 1;
   overflow-y: auto;
   min-height: 0;
   padding: 12px 12px 120px;
 }
-.admin-card {
+
+.notice-card {
   background: #fff;
   border: 1px solid #e5e7eb;
   border-radius: 8px;
@@ -409,54 +492,70 @@ onUnmounted(() => {
   padding: 16px;
   transition: all 0.1s;
 }
+
 .card-clickable {
   cursor: pointer;
 }
+
 .card-selected {
   background: #fff5f0 !important;
   border-color: #ffb899 !important;
 }
+
 .card-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  justify-content: space-between;
+  margin-bottom: 12px;
   padding-bottom: 12px;
   border-bottom: 1px solid #f3f4f6;
 }
+
 .card-body {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
+
 .card-field {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
 }
+
 .card-label {
   font-size: 13px;
   color: #6b7280;
   font-weight: 500;
+  flex-shrink: 0;
 }
+
 .card-value {
   font-size: 13px;
   color: #1f2937;
   text-align: right;
 }
+
+.notice-title {
+  text-align: left;
+  flex: 1;
+}
+
 .loading-card,
 .empty-card {
   padding: 60px 16px;
   text-align: center;
   color: #6b7280;
 }
+
 .loading-more-card {
   padding: 20px 16px;
   text-align: center;
   color: #6b7280;
   font-size: 13px;
 }
+
 .loading-spinner {
   width: 16px;
   height: 16px;
@@ -465,71 +564,47 @@ onUnmounted(() => {
   border-radius: 50%;
   animation: spin 0.6s linear infinite;
 }
+
 @keyframes spin {
   to {
     transform: rotate(360deg);
   }
 }
+
 .sentinel {
   height: 1px;
   visibility: hidden;
 }
-.role-badge {
-  display: inline-block;
-  padding: 4px 12px;
-  font-size: 12px;
-  font-weight: 500;
-  border-radius: 12px;
+
+.table-container::-webkit-scrollbar {
+  width: 6px;
 }
-.role-super {
-  background: #f3e8ff;
-  color: #7c3aed;
-}
-.role-admin {
-  background: #dbeafe;
-  color: #2563eb;
-}
-.role-viewer {
-  background: #d1fae5;
-  color: #059669;
-}
-.table-container::-webkit-scrollbar,
-.card-container::-webkit-scrollbar {
-  width: 8px;
-}
-.table-container::-webkit-scrollbar-track,
-.card-container::-webkit-scrollbar-track {
+
+.table-container::-webkit-scrollbar-track {
   background: #f1f1f1;
 }
-.table-container::-webkit-scrollbar-thumb,
-.card-container::-webkit-scrollbar-thumb {
+
+.table-container::-webkit-scrollbar-thumb {
   background: #cbd5e1;
   border-radius: 4px;
 }
-.table-container::-webkit-scrollbar-thumb:hover,
-.card-container::-webkit-scrollbar-thumb:hover {
+
+.table-container::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }
+
 @media (max-width: 600px) {
   .action-bar {
     padding: 8px 12px;
   }
+
   .action-buttons {
     width: 100%;
     flex-direction: column;
   }
+
   .action-buttons button {
     width: 100%;
-  }
-}
-@media (max-width: 350px) {
-  .card-field {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 4px;
-  }
-  .card-value {
-    text-align: left;
   }
 }
 </style>

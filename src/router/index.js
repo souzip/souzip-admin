@@ -7,6 +7,7 @@ import AdminLayout from '@/layouts/AdminLayout.vue'
 import AdminManagement from '@/views/admin/management/AdminManagement.vue'
 // import CountriesView from '@/views/admin/destination/CountriesView.vue'
 import CitiesView from '@/views/admin/destination/CitiesView.vue'
+import NoticesView from '@/views/admin/notice/NoticesView.vue'
 
 const routes = [
   { path: '/', redirect: '/admin/cities' },
@@ -36,6 +37,11 @@ const routes = [
         path: 'cities',
         name: 'admin-cities',
         component: CitiesView,
+      },
+      {
+        path: 'notices',
+        name: 'admin-notices',
+        component: NoticesView,
       },
       {
         path: 'management',
