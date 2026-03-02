@@ -448,6 +448,8 @@ const ImageChipExtension = Node.create({
   },
 
   renderHTML({ HTMLAttributes }) {
+    // 작성 중에는 굳이 가운데 강제할 필요 없으니 기존대로 둬도 되는데,
+    // "저장 시점에만" 강제할 거라면 여기 그대로여도 상관없음.
     return [
       'img',
       mergeAttributes(HTMLAttributes, {
@@ -594,6 +596,26 @@ function validate() {
   return valid
 }
 
+/**
+ * 저장/수정 시점에만 이미지 가운데 정렬 강제
+ * - 작성 중(에디터 화면)에는 영향 없음
+ * - 저장되는 HTML 자체가 중앙 정렬이 되므로, 어디서 렌더링하든 중앙 정렬 유지
+ */
+function forceCenterImages(html) {
+  if (!html) return ''
+
+  return html.replaceAll(/<img\b([^>]*)>/g, (match, attrs) => {
+    // 기존 style 제거 (중앙 강제를 위해 통일)
+    const withoutStyle = attrs.replace(/\sstyle="[^"]*"/g, '')
+
+    // 중앙 정렬 강제 style
+    const centerStyle =
+      ' style="display:block; margin:8px auto; max-width:100%; height:auto; border-radius:6px;"'
+
+    return `<img${withoutStyle}${centerStyle}>`
+  })
+}
+
 async function handleSubmit() {
   if (!validate()) return
   submitting.value = true
@@ -610,6 +632,8 @@ async function handleSubmit() {
         }
       })
     }
+
+    contentToSave = forceCenterImages(contentToSave)
 
     if (isEdit.value) {
       await updateNotice(props.notice.id, {
@@ -1063,7 +1087,7 @@ function onClose() {
   max-width: 100%;
   height: auto;
   border-radius: 6px;
-  margin: 8px 0;
+  margin: 8px 0; /* 작성 중에는 기존대로 */
   display: block;
 }
 
