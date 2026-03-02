@@ -1,10 +1,10 @@
 <template>
   <aside
-    class="w-64 bg-white border-gray-200 md:border-r md:min-h-[calc(100vh-56px)] md:relative fixed top-0 right-0 h-full border-l z-40 md:translate-x-0"
+    class="w-64 bg-white border-gray-200 lg:border-r lg:min-h-[calc(100vh-56px)] lg:relative fixed top-0 right-0 h-full border-l z-40 lg:translate-x-0"
     :class="[openClass, { 'transition-transform duration-300 ease-in-out': isAnimating }]"
   >
     <div class="flex flex-col h-full">
-      <div class="md:hidden h-16 flex items-center justify-between px-4 border-b border-gray-200">
+      <div class="lg:hidden h-16 flex items-center justify-between px-4 border-b border-gray-200">
         <span class="font-semibold text-gray-900">메뉴</span>
         <button
           type="button"
@@ -202,7 +202,7 @@
       </nav>
 
       <!-- 모바일용 로그아웃 버튼 -->
-      <div class="md:hidden p-4 border-t border-gray-200">
+      <div class="lg:hidden p-4 border-t border-gray-200">
         <button type="button" class="w-full btn-secondary" @click="onLogout">로그아웃</button>
       </div>
     </div>
@@ -263,14 +263,14 @@ watch(
 
 function handleDestinationClick() {
   isDestinationOpen.value = !isDestinationOpen.value
-  if (window.innerWidth >= 768) {
+  if (window.innerWidth >= 1024) {
     router.push('/admin/cities')
   }
 }
 
 function handleSupportClick() {
   isSupportOpen.value = !isSupportOpen.value
-  if (window.innerWidth >= 768) {
+  if (window.innerWidth >= 1024) {
     router.push('/admin/notices')
   }
 }
@@ -280,7 +280,7 @@ function onClose() {
 }
 
 function onNavClick() {
-  if (window.innerWidth < 768) {
+  if (window.innerWidth < 1024) {
     emit('close')
   }
 }

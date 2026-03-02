@@ -8,14 +8,14 @@
 
       <div class="flex items-center gap-2">
         <!-- 데스크톱용 로그아웃 버튼 -->
-        <button type="button" class="hidden md:block btn-secondary" @click="handleLogout">
+        <button type="button" class="hidden lg:block btn-secondary" @click="handleLogout">
           로그아웃
         </button>
 
         <!-- 모바일/태블릿용 햄버거 버튼 -->
         <button
           type="button"
-          class="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+          class="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
           @click="onToggleSidebar"
         >
           <svg

@@ -1,10 +1,8 @@
-<!-- AdminLayout.vue -->
 <template>
   <div class="min-h-screen bg-gray-50">
     <AdminTopbar @toggleSidebar="toggleSidebar" />
 
     <div class="flex relative">
-      <!-- 모바일 오버레이 배경 -->
       <transition name="fade">
         <div
           v-if="sidebarOpen"
@@ -31,7 +29,7 @@ import AdminSidebar from '@/components/admin/AdminSidebar.vue'
 import { useAuth } from '@/composables/useAuth'
 
 const { handleLogout } = useAuth()
-const sidebarOpen = ref(false) // 모바일에서는 기본적으로 닫힌 상태
+const sidebarOpen = ref(false)
 
 function toggleSidebar() {
   sidebarOpen.value = !sidebarOpen.value
