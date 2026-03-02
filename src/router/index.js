@@ -58,11 +58,7 @@ const router = createRouter({
 })
 
 function isLoginPath(path) {
-  if (path === '/admin/login') {
-    return true
-  }
-
-  return false
+  return path === '/admin/login'
 }
 
 router.beforeEach((to) => {

@@ -188,9 +188,9 @@ const router = useRouter()
 const auth = useAuthStore()
 const { getAdmins, deleteAdmins } = useAdminManagement()
 
-const isMobile = ref(window.innerWidth <= 600)
+const isMobile = ref(window.innerWidth <= 1024)
 const onResize = () => {
-  isMobile.value = window.innerWidth <= 600
+  isMobile.value = window.innerWidth <= 1024
 }
 
 const isSuperAdmin = computed(() => auth.admin?.role === 'SUPER_ADMIN')
@@ -510,7 +510,7 @@ onUnmounted(() => {
 .card-container::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }
-@media (max-width: 600px) {
+@media (max-width: 1024px) {
   .action-bar {
     padding: 8px 12px;
   }

@@ -1,4 +1,3 @@
-<!-- src/views/admin/notice/NoticesView.vue -->
 <template>
   <div class="notices-container">
     <!-- 액션 바 -->
@@ -75,12 +74,12 @@
               <td class="text-center">
                 <span
                   class="status-badge"
-                  :class="notice.visible !== false ? 'status-public' : 'status-hidden'"
+                  :class="getStatusFromNotice(notice) ? 'status-public' : 'status-hidden'"
                 >
-                  {{ notice.visible !== false ? '공개' : '숨김' }}
+                  {{ getStatusFromNotice(notice) ? '공개' : '숨김' }}
                 </span>
               </td>
-              <td class="text-center">{{ formatAuthor(notice.author) }}</td>
+              <td class="text-center">{{ formatAuthor(notice) }}</td>
               <td class="text-center whitespace-nowrap">{{ formatDate(notice.createdAt) }}</td>
               <td class="text-center whitespace-nowrap">{{ formatDate(notice.updatedAt) }}</td>
             </tr>
@@ -122,9 +121,9 @@
             />
             <span
               class="status-badge"
-              :class="notice.visible !== false ? 'status-public' : 'status-hidden'"
+              :class="getStatusFromNotice(notice) ? 'status-public' : 'status-hidden'"
             >
-              {{ notice.visible !== false ? '공개' : '숨김' }}
+              {{ getStatusFromNotice(notice) ? '공개' : '숨김' }}
             </span>
           </div>
           <div class="card-body">
@@ -134,7 +133,7 @@
             </div>
             <div class="card-field">
               <span class="card-label">작성자</span>
-              <span class="card-value">{{ formatAuthor(notice.author) }}</span>
+              <span class="card-value">{{ formatAuthor(notice) }}</span>
             </div>
             <div class="card-field">
               <span class="card-label">작성일</span>
@@ -157,6 +156,15 @@
     </div>
 
     <!-- 모달들 -->
+    <!-- ✅ 상세보기 모달 추가 -->
+    <NoticeDetailModal
+      :is-open="detailModal.isOpen"
+      :notice="detailModal.notice"
+      @close="closeDetailModal"
+      @edit="handleEditFromDetail"
+      @delete="handleDeleteFromDetail"
+    />
+
     <NoticeFormModal
       :is-open="formModal.isOpen"
       :notice="formModal.notice"
@@ -185,6 +193,7 @@ import { ref, computed, onMounted, onUnmounted, reactive } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useNoticeManagement } from '@/composables/useNoticeManagement'
 import { useInfiniteScroll } from '@/composables/useInfiniteScroll'
+import NoticeDetailModal from '@/components/admin/NoticeDetailModal.vue'
 import NoticeFormModal from '@/components/admin/NoticeFormModal.vue'
 import ConfirmModal from '@/components/ConfirmModal.vue'
 import AlertModal from '@/components/AlertModal.vue'
@@ -192,9 +201,9 @@ import AlertModal from '@/components/AlertModal.vue'
 const auth = useAuthStore()
 const { getNotices, deleteNotices } = useNoticeManagement()
 
-const isMobile = ref(window.innerWidth <= 600)
+const isMobile = ref(window.innerWidth <= 1024)
 const onResize = () => {
-  isMobile.value = window.innerWidth <= 600
+  isMobile.value = window.innerWidth <= 1024
 }
 
 const canEdit = computed(() => {
@@ -213,6 +222,28 @@ const {
   initialize,
   cleanup,
 } = useInfiniteScroll({ pageSize: 20, fetchFunction: getNotices })
+
+const detailModal = reactive({ isOpen: false, notice: null })
+
+function openDetailModal(notice) {
+  detailModal.notice = notice
+  detailModal.isOpen = true
+}
+
+function closeDetailModal() {
+  detailModal.isOpen = false
+}
+
+function handleEditFromDetail(notice) {
+  closeDetailModal()
+  openEditModal(notice)
+}
+
+function handleDeleteFromDetail(noticeId) {
+  closeDetailModal()
+  selectedIds.value = [noticeId]
+  openDeleteConfirm()
+}
 
 const formModal = reactive({ isOpen: false, notice: null })
 
@@ -237,8 +268,7 @@ function handleFormSuccess(type) {
 }
 
 function handleRowClick(notice) {
-  if (!canEdit.value) return
-  openEditModal(notice)
+  openDetailModal(notice)
 }
 
 const confirmModal = reactive({ isOpen: false, message: '' })
@@ -297,10 +327,24 @@ async function handleDeleteConfirm() {
   }
 }
 
-function formatAuthor(author) {
-  if (!author) return '-'
-  if (typeof author === 'object') return author.username ?? '-'
-  return author
+function getStatusFromNotice(notice) {
+  if ('status' in notice) {
+    return notice.status === 'ACTIVE'
+  }
+  return notice.visible !== false
+}
+
+function formatAuthor(notice) {
+  if (notice.authorId) {
+    return '관리자'
+  }
+  if (notice.author) {
+    if (typeof notice.author === 'object') {
+      return notice.author.username ?? '-'
+    }
+    return notice.author
+  }
+  return '-'
 }
 
 function formatDate(dateString) {
@@ -381,6 +425,7 @@ onUnmounted(() => {
   font-weight: 600;
   color: #374151;
   border-bottom: 1px solid #e5e7eb;
+  white-space: nowrap;
 }
 
 .data-table tbody tr {
@@ -412,24 +457,27 @@ onUnmounted(() => {
 }
 
 .col-title {
-  text-align: left !important;
   width: 35%;
 }
 
 .col-title-cell {
-  text-align: left;
+  text-align: center;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  max-width: 0;
 }
 
 .col-status {
-  width: 80px;
+  width: 90px;
 }
 
 .col-author {
-  width: 120px;
+  width: 100px;
 }
 
 .col-date {
-  width: 160px;
+  width: 180px;
 }
 
 .status-badge {
@@ -439,6 +487,7 @@ onUnmounted(() => {
   border-radius: 20px;
   font-size: 12px;
   font-weight: 500;
+  white-space: nowrap;
 }
 
 .status-public {
@@ -521,7 +570,7 @@ onUnmounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 8px;
+  gap: 24px;
 }
 
 .card-label {
@@ -538,8 +587,11 @@ onUnmounted(() => {
 }
 
 .notice-title {
-  text-align: left;
+  text-align: right;
   flex: 1;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .loading-card,
@@ -593,7 +645,7 @@ onUnmounted(() => {
   background: #94a3b8;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 1024px) {
   .action-bar {
     padding: 8px 12px;
   }
@@ -605,6 +657,19 @@ onUnmounted(() => {
 
   .action-buttons button {
     width: 100%;
+  }
+}
+
+@media (max-width: 350px) {
+  .card-field {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .notice-title {
+    text-align: left;
+    white-space: normal;
   }
 }
 </style>

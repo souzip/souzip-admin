@@ -1,3 +1,4 @@
+<!-- src/components/admin/NoticeFormModal.vue -->
 <template>
   <Teleport to="body">
     <Transition name="modal">
@@ -23,283 +24,285 @@
             </button>
           </div>
 
-          <form class="modal-body" @submit.prevent="handleSubmit">
-            <!-- 제목 -->
-            <div class="form-group">
-              <label class="label-base" for="notice-title">
-                제목 <span class="text-red-500">*</span>
-              </label>
-              <input
-                id="notice-title"
-                v-model="form.title"
-                type="text"
-                class="input-base"
-                :class="{ 'input-error': errors.title }"
-                placeholder="제목을 입력하세요"
-                maxlength="200"
-              />
-              <p v-if="errors.title" class="error-text">{{ errors.title }}</p>
-            </div>
-
-            <!-- 공개 여부 -->
-            <div class="form-group">
-              <label class="label-base">공개 여부</label>
-              <div class="toggle-wrap">
-                <button
-                  type="button"
-                  class="toggle-btn"
-                  :class="form.visible ? 'toggle-on' : 'toggle-off'"
-                  @click="form.visible = !form.visible"
-                >
-                  <span class="toggle-knob"></span>
-                </button>
-                <span class="toggle-label">{{ form.visible ? '공개' : '숨김' }}</span>
+          <div class="modal-body">
+            <form id="notice-form" @submit.prevent="handleSubmit">
+              <!-- 제목 -->
+              <div class="form-group">
+                <label class="label-base" for="notice-title">
+                  제목 <span class="text-red-500">*</span>
+                </label>
+                <input
+                  id="notice-title"
+                  v-model="form.title"
+                  type="text"
+                  class="input-base"
+                  :class="{ 'input-error': errors.title }"
+                  placeholder="제목을 입력하세요"
+                  maxlength="200"
+                />
+                <p v-if="errors.title" class="error-text">{{ errors.title }}</p>
               </div>
-            </div>
 
-            <!-- 본문 에디터 -->
-            <div class="form-group">
-              <label class="label-base">내용 <span class="text-red-500">*</span></label>
+              <!-- 공개 여부 -->
+              <div class="form-group">
+                <label class="label-base">공개 여부</label>
+                <div class="toggle-wrap">
+                  <button
+                    type="button"
+                    class="toggle-btn"
+                    :class="form.visible ? 'toggle-on' : 'toggle-off'"
+                    @click="form.visible = !form.visible"
+                  >
+                    <span class="toggle-knob"></span>
+                  </button>
+                  <span class="toggle-label">{{ form.visible ? '공개' : '숨김' }}</span>
+                </div>
+              </div>
 
-              <div class="editor-container" :class="{ 'editor-container-error': errors.content }">
-                <!-- 툴바 -->
-                <div class="editor-toolbar">
-                  <button
-                    type="button"
-                    class="toolbar-btn"
-                    :class="{ active: editor?.isActive('bold') }"
-                    title="굵게"
-                    @click="editor?.chain().focus().toggleBold().run()"
-                  >
-                    <strong>B</strong>
-                  </button>
-                  <button
-                    type="button"
-                    class="toolbar-btn"
-                    :class="{ active: editor?.isActive('italic') }"
-                    title="기울임"
-                    @click="editor?.chain().focus().toggleItalic().run()"
-                  >
-                    <em>I</em>
-                  </button>
-                  <button
-                    type="button"
-                    class="toolbar-btn"
-                    :class="{ active: editor?.isActive('strike') }"
-                    title="취소선"
-                    @click="editor?.chain().focus().toggleStrike().run()"
-                  >
-                    <s>S</s>
-                  </button>
-                  <div class="toolbar-divider"></div>
+              <!-- 본문 에디터 -->
+              <div class="form-group">
+                <label class="label-base">내용 <span class="text-red-500">*</span></label>
 
-                  <button
-                    type="button"
-                    class="toolbar-btn"
-                    :class="{ active: editor?.isActive('heading', { level: 2 }) }"
-                    title="제목2"
-                    @click="editor?.chain().focus().toggleHeading({ level: 2 }).run()"
-                  >
-                    H2
-                  </button>
-                  <button
-                    type="button"
-                    class="toolbar-btn"
-                    :class="{ active: editor?.isActive('heading', { level: 3 }) }"
-                    title="제목3"
-                    @click="editor?.chain().focus().toggleHeading({ level: 3 }).run()"
-                  >
-                    H3
-                  </button>
-                  <div class="toolbar-divider"></div>
-
-                  <button
-                    type="button"
-                    class="toolbar-btn"
-                    :class="{ active: editor?.isActive({ textAlign: 'left' }) }"
-                    title="왼쪽 정렬"
-                    @click="editor?.chain().focus().setTextAlign('left').run()"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      class="h-4 w-4"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
+                <div class="editor-container" :class="{ 'editor-container-error': errors.content }">
+                  <!-- 툴바 -->
+                  <div class="editor-toolbar">
+                    <button
+                      type="button"
+                      class="toolbar-btn"
+                      :class="{ active: editor?.isActive('bold') }"
+                      title="굵게"
+                      @click="editor?.chain().focus().toggleBold().run()"
                     >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M4 6h16M4 12h10M4 18h14"
-                      />
-                    </svg>
-                  </button>
-                  <button
-                    type="button"
-                    class="toolbar-btn"
-                    :class="{ active: editor?.isActive({ textAlign: 'center' }) }"
-                    title="가운데 정렬"
-                    @click="editor?.chain().focus().setTextAlign('center').run()"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      class="h-4 w-4"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
+                      <strong>B</strong>
+                    </button>
+                    <button
+                      type="button"
+                      class="toolbar-btn"
+                      :class="{ active: editor?.isActive('italic') }"
+                      title="기울임"
+                      @click="editor?.chain().focus().toggleItalic().run()"
                     >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M4 6h16M7 12h10M5 18h14"
-                      />
-                    </svg>
-                  </button>
-                  <button
-                    type="button"
-                    class="toolbar-btn"
-                    :class="{ active: editor?.isActive({ textAlign: 'right' }) }"
-                    title="오른쪽 정렬"
-                    @click="editor?.chain().focus().setTextAlign('right').run()"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      class="h-4 w-4"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
+                      <em>I</em>
+                    </button>
+                    <button
+                      type="button"
+                      class="toolbar-btn"
+                      :class="{ active: editor?.isActive('strike') }"
+                      title="취소선"
+                      @click="editor?.chain().focus().toggleStrike().run()"
                     >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M4 6h16M10 12h10M6 18h14"
-                      />
-                    </svg>
-                  </button>
-                  <div class="toolbar-divider"></div>
+                      <s>S</s>
+                    </button>
+                    <div class="toolbar-divider"></div>
 
-                  <button
-                    type="button"
-                    class="toolbar-btn"
-                    :class="{ active: editor?.isActive('bulletList') }"
-                    title="글머리 기호"
-                    @click="editor?.chain().focus().toggleBulletList().run()"
-                  >
-                    ≡
-                  </button>
-                  <button
-                    type="button"
-                    class="toolbar-btn"
-                    :class="{ active: editor?.isActive('orderedList') }"
-                    title="번호 목록"
-                    @click="editor?.chain().focus().toggleOrderedList().run()"
-                  >
-                    1.
-                  </button>
-                  <div class="toolbar-divider"></div>
-
-                  <button
-                    type="button"
-                    class="toolbar-btn"
-                    :class="{ active: editor?.isActive('blockquote') }"
-                    title="인용"
-                    @click="editor?.chain().focus().toggleBlockquote().run()"
-                  >
-                    "
-                  </button>
-                  <button
-                    type="button"
-                    class="toolbar-btn"
-                    title="구분선"
-                    @click="editor?.chain().focus().setHorizontalRule().run()"
-                  >
-                    —
-                  </button>
-                  <div class="toolbar-divider"></div>
-
-                  <button
-                    type="button"
-                    class="toolbar-btn"
-                    :class="{ active: editor?.isActive('link') }"
-                    title="링크 삽입"
-                    @click="handleLinkClick"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      class="h-4 w-4"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
+                    <button
+                      type="button"
+                      class="toolbar-btn"
+                      :class="{ active: editor?.isActive('heading', { level: 2 }) }"
+                      title="제목2"
+                      @click="editor?.chain().focus().toggleHeading({ level: 2 }).run()"
                     >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
-                      />
-                    </svg>
-                  </button>
-
-                  <label class="toolbar-btn" title="이미지 삽입" style="cursor: pointer">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      class="h-4 w-4"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
+                      H2
+                    </button>
+                    <button
+                      type="button"
+                      class="toolbar-btn"
+                      :class="{ active: editor?.isActive('heading', { level: 3 }) }"
+                      title="제목3"
+                      @click="editor?.chain().focus().toggleHeading({ level: 3 }).run()"
                     >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                      H3
+                    </button>
+                    <div class="toolbar-divider"></div>
+
+                    <button
+                      type="button"
+                      class="toolbar-btn"
+                      :class="{ active: editor?.isActive({ textAlign: 'left' }) }"
+                      title="왼쪽 정렬"
+                      @click="editor?.chain().focus().setTextAlign('left').run()"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="h-4 w-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M4 6h16M4 12h10M4 18h14"
+                        />
+                      </svg>
+                    </button>
+                    <button
+                      type="button"
+                      class="toolbar-btn"
+                      :class="{ active: editor?.isActive({ textAlign: 'center' }) }"
+                      title="가운데 정렬"
+                      @click="editor?.chain().focus().setTextAlign('center').run()"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="h-4 w-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M4 6h16M7 12h10M5 18h14"
+                        />
+                      </svg>
+                    </button>
+                    <button
+                      type="button"
+                      class="toolbar-btn"
+                      :class="{ active: editor?.isActive({ textAlign: 'right' }) }"
+                      title="오른쪽 정렬"
+                      @click="editor?.chain().focus().setTextAlign('right').run()"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="h-4 w-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M4 6h16M10 12h10M6 18h14"
+                        />
+                      </svg>
+                    </button>
+                    <div class="toolbar-divider"></div>
+
+                    <button
+                      type="button"
+                      class="toolbar-btn"
+                      :class="{ active: editor?.isActive('bulletList') }"
+                      title="글머리 기호"
+                      @click="editor?.chain().focus().toggleBulletList().run()"
+                    >
+                      ≡
+                    </button>
+                    <button
+                      type="button"
+                      class="toolbar-btn"
+                      :class="{ active: editor?.isActive('orderedList') }"
+                      title="번호 목록"
+                      @click="editor?.chain().focus().toggleOrderedList().run()"
+                    >
+                      1.
+                    </button>
+                    <div class="toolbar-divider"></div>
+
+                    <button
+                      type="button"
+                      class="toolbar-btn"
+                      :class="{ active: editor?.isActive('blockquote') }"
+                      title="인용"
+                      @click="editor?.chain().focus().toggleBlockquote().run()"
+                    >
+                      "
+                    </button>
+                    <button
+                      type="button"
+                      class="toolbar-btn"
+                      title="구분선"
+                      @click="editor?.chain().focus().setHorizontalRule().run()"
+                    >
+                      —
+                    </button>
+                    <div class="toolbar-divider"></div>
+
+                    <button
+                      type="button"
+                      class="toolbar-btn"
+                      :class="{ active: editor?.isActive('link') }"
+                      title="링크 삽입"
+                      @click="handleLinkClick"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="h-4 w-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
+                        />
+                      </svg>
+                    </button>
+
+                    <label class="toolbar-btn" title="이미지 삽입" style="cursor: pointer">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="h-4 w-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                        />
+                      </svg>
+                      <input
+                        ref="imageInput"
+                        type="file"
+                        accept="image/*"
+                        class="hidden"
+                        @change="handleImageInsert"
                       />
-                    </svg>
+                    </label>
+                  </div>
+
+                  <!-- 링크 입력 팝업 -->
+                  <div v-if="linkPopup.visible" class="link-popup">
                     <input
-                      ref="imageInput"
-                      type="file"
-                      accept="image/*"
-                      class="hidden"
-                      @change="handleImageInsert"
+                      ref="linkInputRef"
+                      v-model="linkPopup.url"
+                      type="url"
+                      class="link-input"
+                      placeholder="https://example.com"
+                      @keydown.enter.prevent="applyLink"
+                      @keydown.esc="closeLinkPopup"
                     />
-                  </label>
-                </div>
+                    <button type="button" class="link-apply-btn" @click="applyLink">적용</button>
+                    <button type="button" class="link-cancel-btn" @click="closeLinkPopup">
+                      취소
+                    </button>
+                  </div>
 
-                <!-- 링크 입력 팝업 -->
-                <div v-if="linkPopup.visible" class="link-popup">
-                  <input
-                    ref="linkInputRef"
-                    v-model="linkPopup.url"
-                    type="url"
-                    class="link-input"
-                    placeholder="https://example.com"
-                    @keydown.enter.prevent="applyLink"
-                    @keydown.esc="closeLinkPopup"
-                  />
-                  <button type="button" class="link-apply-btn" @click="applyLink">적용</button>
-                  <button type="button" class="link-cancel-btn" @click="closeLinkPopup">
-                    취소
-                  </button>
+                  <!-- 에디터 본문 -->
+                  <div class="editor-wrapper">
+                    <EditorContent :editor="editor" class="editor-content" />
+                  </div>
                 </div>
-
-                <!-- 에디터 본문 -->
-                <div class="editor-wrapper">
-                  <EditorContent :editor="editor" class="editor-content" />
-                </div>
+                <p v-if="errors.content" class="error-text">{{ errors.content }}</p>
               </div>
-              <p v-if="errors.content" class="error-text">{{ errors.content }}</p>
-            </div>
+            </form>
+          </div>
 
-            <div class="modal-footer">
-              <button type="button" class="btn-secondary" @click="onClose">취소</button>
-              <button type="submit" class="btn-primary" :disabled="submitting">
-                {{ submitting ? '저장 중' : isEdit ? '수정' : '등록' }}
-              </button>
-            </div>
-          </form>
+          <div class="modal-footer">
+            <button type="button" class="btn-secondary" @click="onClose">취소</button>
+            <button type="submit" form="notice-form" class="btn-primary" :disabled="submitting">
+              {{ isEdit ? '완료' : '등록' }}
+            </button>
+          </div>
         </div>
       </div>
     </Transition>
@@ -332,28 +335,53 @@ const submitting = ref(false)
 const imageInput = ref(null)
 const linkInputRef = ref(null)
 const linkPopup = reactive({ visible: false, url: '' })
+const imageFiles = ref([])
+const deleteFileIds = ref([])
 
-// ─── ImageChip 컴포넌트 ───
 const ImageChip = defineComponent({
-  props: { node: Object },
+  props: {
+    node: Object,
+    deleteNode: Function,
+  },
   setup(props) {
+    const src = computed(() => props.node?.attrs?.src ?? '')
+    const alt = computed(() => props.node?.attrs?.alt ?? '')
+    const fileId = computed(() => props.node?.attrs?.fileId ?? null)
+
     const filename = computed(() => {
-      const alt = props.node?.attrs?.alt ?? ''
-      const src = props.node?.attrs?.src ?? ''
-      if (alt) return alt
-      if (src.startsWith('data:')) return '이미지'
-      return src.split('/').pop()?.split('?')[0] || '이미지'
+      if (alt.value) return alt.value
+      if (src.value.startsWith('placeholder-')) return '새 이미지'
+      if (src.value.startsWith('existing-')) return '기존 이미지'
+      return src.value.split('/').pop()?.split('?')[0] || '이미지'
     })
+
+    const handleDelete = (event) => {
+      event.preventDefault()
+      event.stopPropagation()
+
+      if (src.value.startsWith('placeholder-')) {
+        const match = src.value.match(/placeholder-(\d+)/)
+        if (match) {
+          const index = parseInt(match[1])
+          imageFiles.value.splice(index, 1)
+        }
+      } else if (src.value.startsWith('existing-') && fileId.value) {
+        deleteFileIds.value.push(fileId.value)
+      }
+
+      props.deleteNode?.()
+    }
+
     return () =>
-      h(NodeViewWrapper, { as: 'span', style: { display: 'inline-block' } }, () =>
+      h(NodeViewWrapper, { as: 'span', style: { display: 'inline-block', margin: '4px 0' } }, () =>
         h(
           'span',
           {
             style: {
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '4px',
-              padding: '3px 10px',
+              gap: '6px',
+              padding: '4px 8px 4px 12px',
               background: '#fff5f0',
               border: '1px solid #ffb899',
               borderRadius: '99px',
@@ -364,13 +392,44 @@ const ImageChip = defineComponent({
               verticalAlign: 'middle',
             },
           },
-          ['📎 ', filename.value]
+          [
+            h('span', {}, ['📎 ', filename.value]),
+            h(
+              'button',
+              {
+                type: 'button',
+                onClick: handleDelete,
+                style: {
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '16px',
+                  height: '16px',
+                  padding: '0',
+                  background: 'transparent',
+                  border: 'none',
+                  cursor: 'pointer',
+                  color: '#ff7738',
+                  fontSize: '18px',
+                  lineHeight: '1',
+                  transition: 'opacity 0.15s',
+                  opacity: '0.6',
+                },
+                onMouseenter: (e) => {
+                  e.target.style.opacity = '1'
+                },
+                onMouseleave: (e) => {
+                  e.target.style.opacity = '0.6'
+                },
+              },
+              '×'
+            ),
+          ]
         )
       )
   },
 })
 
-// ─── 커스텀 Image 익스텐션 ───
 const ImageChipExtension = Node.create({
   name: 'image',
   group: 'block',
@@ -380,6 +439,7 @@ const ImageChipExtension = Node.create({
     return {
       src: { default: null },
       alt: { default: null },
+      fileId: { default: null },
     }
   },
 
@@ -411,7 +471,6 @@ const ImageChipExtension = Node.create({
   },
 })
 
-// ─── Tiptap 에디터 ───
 const editor = useEditor({
   extensions: [
     StarterKit,
@@ -431,12 +490,37 @@ watch(
   (open) => {
     if (open) {
       form.title = props.notice?.title ?? ''
-      form.visible = props.notice?.visible ?? true
-      editor.value?.commands.setContent(props.notice?.content ?? '')
+      form.visible = props.notice?.status === 'ACTIVE' || props.notice?.visible !== false
+
+      if (isEdit.value && props.notice?.content) {
+        let processedContent = props.notice.content
+
+        if (props.notice.files && props.notice.files.length > 0) {
+          const sortedFiles = [...props.notice.files].sort(
+            (a, b) => a.displayOrder - b.displayOrder
+          )
+
+          sortedFiles.forEach((file, index) => {
+            const placeholder = `placeholder-${index}`
+            const imgRegex = new RegExp(`<img([^>]*?)src="${placeholder}"([^>]*?)>`, 'g')
+            processedContent = processedContent.replace(
+              imgRegex,
+              `<img$1src="existing-${file.id}"$2 data-file-id="${file.id}">`
+            )
+          })
+        }
+
+        editor.value?.commands.setContent(processedContent)
+      } else {
+        editor.value?.commands.setContent('')
+      }
+
       errors.title = ''
       errors.content = ''
       linkPopup.visible = false
       linkPopup.url = ''
+      imageFiles.value = []
+      deleteFileIds.value = []
     }
   }
 )
@@ -448,11 +532,18 @@ onBeforeUnmount(() => {
 function handleImageInsert(event) {
   const file = event.target.files?.[0]
   if (!file) return
-  const reader = new FileReader()
-  reader.onload = (e) => {
-    editor.value?.chain().focus().setImage({ src: e.target.result, alt: file.name }).run()
-  }
-  reader.readAsDataURL(file)
+
+  imageFiles.value.push(file)
+
+  editor.value
+    ?.chain()
+    .focus()
+    .setImage({
+      src: `placeholder-${imageFiles.value.length - 1}`,
+      alt: file.name,
+    })
+    .run()
+
   event.target.value = ''
 }
 
@@ -507,18 +598,35 @@ async function handleSubmit() {
   if (!validate()) return
   submitting.value = true
 
-  const payload = {
-    title: form.title.trim(),
-    content: editor.value?.getHTML() ?? '',
-    visible: form.visible,
-  }
-
   try {
+    let contentToSave = editor.value?.getHTML() ?? ''
+
+    if (isEdit.value && props.notice?.files) {
+      props.notice.files.forEach((file) => {
+        const existingPattern = `existing-${file.id}`
+        if (!deleteFileIds.value.includes(file.id)) {
+          const fileIndex = props.notice.files.findIndex((f) => f.id === file.id)
+          contentToSave = contentToSave.replaceAll(existingPattern, `placeholder-${fileIndex}`)
+        }
+      })
+    }
+
     if (isEdit.value) {
-      await updateNotice(props.notice.id, payload)
+      await updateNotice(props.notice.id, {
+        title: form.title.trim(),
+        content: contentToSave,
+        status: form.visible ? 'ACTIVE' : 'INACTIVE',
+        deleteFileIds: deleteFileIds.value,
+        newFiles: imageFiles.value,
+      })
       emit('success', 'update')
     } else {
-      await createNotice(payload)
+      await createNotice({
+        title: form.title.trim(),
+        content: contentToSave,
+        status: form.visible ? 'ACTIVE' : 'INACTIVE',
+        files: imageFiles.value,
+      })
       emit('success', 'create')
     }
   } catch (error) {
@@ -552,7 +660,6 @@ function onClose() {
   width: 100%;
   max-width: 720px;
   max-height: 90vh;
-  overflow-y: auto;
   display: flex;
   flex-direction: column;
 }
@@ -568,6 +675,7 @@ function onClose() {
   top: 0;
   background: #fff;
   z-index: 1;
+  border-radius: 12px 12px 0 0;
 }
 
 .modal-title {
@@ -588,32 +696,33 @@ function onClose() {
 }
 
 .modal-body {
+  flex: 1;
+  overflow-y: auto;
   padding: 20px 24px;
+}
+
+.modal-body form {
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
-.modal-body > .form-group:first-child {
-  margin-top: 4px;
-}
-
 .modal-footer {
   display: flex;
-  justify-content: flex-end;
   gap: 8px;
-  padding-top: 8px;
+  padding: 16px 24px;
+  border-top: 1px solid #e5e7eb;
 }
 
-/* ─── 푸터 버튼 ─── */
 .btn-secondary,
 .btn-primary {
-  padding: 10px 20px;
+  flex: 1;
+  padding: 10px 16px;
   border-radius: 8px;
   font-size: 14px;
   font-weight: 500;
+  transition: all 0.2s;
   cursor: pointer;
-  transition: all 0.15s;
   border: none;
 }
 
@@ -646,12 +755,36 @@ function onClose() {
   gap: 6px;
 }
 
+.label-base {
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.input-base {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: all 0.15s;
+}
+
+.input-base:focus {
+  outline: none;
+  border-color: #ff7738;
+  box-shadow: 0 0 0 3px rgba(255, 119, 56, 0.1);
+}
+
+.input-error {
+  border-color: #f87171;
+}
+
 .error-text {
   font-size: 12px;
   color: #ef4444;
 }
 
-/* 토글 */
 .toggle-wrap {
   display: flex;
   align-items: center;
@@ -699,7 +832,6 @@ function onClose() {
   color: #374151;
 }
 
-/* 에디터 컨테이너 */
 .editor-container {
   border: 1px solid #e5e7eb;
   border-radius: 8px;
@@ -711,14 +843,13 @@ function onClose() {
 
 .editor-container:focus-within {
   border-color: #ff7738;
-  box-shadow: 0 0 0 3px rgba(255, 119, 56, 0.1);
+  box-shadow: 0 0 0 1px rgba(255, 119, 56, 0.2);
 }
 
 .editor-container-error {
   border-color: #f87171;
 }
 
-/* 툴바 */
 .editor-toolbar {
   display: flex;
   align-items: center;
@@ -760,7 +891,6 @@ function onClose() {
   margin: 0 4px;
 }
 
-/* 링크 팝업 */
 .link-popup {
   display: flex;
   align-items: center;
@@ -815,10 +945,17 @@ function onClose() {
   background: #e5e7eb;
 }
 
-/* 에디터 본문 */
 .editor-wrapper {
   min-height: 300px;
   cursor: text;
+}
+
+.hidden {
+  display: none;
+}
+
+.text-red-500 {
+  color: #ef4444;
 }
 
 .modal-enter-active,
@@ -829,6 +966,17 @@ function onClose() {
 .modal-enter-from,
 .modal-leave-to {
   opacity: 0;
+}
+
+@media (max-width: 1024px) {
+  .modal-footer {
+    flex-direction: column-reverse;
+  }
+
+  .btn-secondary,
+  .btn-primary {
+    width: 100%;
+  }
 }
 </style>
 
@@ -846,37 +994,38 @@ function onClose() {
   font-size: 20px;
   font-weight: 700;
   margin: 16px 0 8px;
+  line-height: 1.4;
 }
 
 .editor-content .ProseMirror h3 {
   font-size: 17px;
   font-weight: 600;
   margin: 14px 0 6px;
+  line-height: 1.4;
 }
 
 .editor-content .ProseMirror p {
   margin: 0 0 8px;
+  line-height: 1.7;
+}
+
+.editor-content .ProseMirror ul,
+.editor-content .ProseMirror ol {
+  padding-left: 0;
+  margin: 8px 0 8px 20px;
 }
 
 .editor-content .ProseMirror ul {
-  padding-left: 20px;
-  margin: 0 0 8px;
   list-style-type: disc;
 }
 
 .editor-content .ProseMirror ol {
-  padding-left: 20px;
-  margin: 0 0 8px;
   list-style-type: decimal;
-}
-
-.editor-content .ProseMirror ul li::marker,
-.editor-content .ProseMirror ol li::marker {
-  color: #1f2937;
 }
 
 .editor-content .ProseMirror li {
   margin-bottom: 4px;
+  line-height: 1.6;
 }
 
 .editor-content .ProseMirror blockquote {
@@ -888,7 +1037,7 @@ function onClose() {
 
 .editor-content .ProseMirror hr {
   border: none;
-  border-top: 1px solid #e5e7eb;
+  border-top: 2px solid #e5e7eb;
   margin: 16px 0;
 }
 
@@ -908,5 +1057,25 @@ function onClose() {
 
 .editor-content .ProseMirror a.notice-link:hover {
   color: #1d4ed8;
+}
+
+.editor-content .ProseMirror img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+  margin: 8px 0;
+  display: block;
+}
+
+.editor-content .ProseMirror [style*='text-align: center'] {
+  text-align: center;
+}
+
+.editor-content .ProseMirror [style*='text-align: right'] {
+  text-align: right;
+}
+
+.editor-content .ProseMirror [style*='text-align: left'] {
+  text-align: left;
 }
 </style>
