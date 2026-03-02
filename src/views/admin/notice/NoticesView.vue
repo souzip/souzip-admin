@@ -155,8 +155,6 @@
       <div ref="sentinel" class="sentinel"></div>
     </div>
 
-    <!-- 모달들 -->
-    <!-- ✅ 상세보기 모달 추가 -->
     <NoticeDetailModal
       :is-open="detailModal.isOpen"
       :notice="detailModal.notice"
@@ -335,16 +333,12 @@ function getStatusFromNotice(notice) {
 }
 
 function formatAuthor(notice) {
-  if (notice.authorId) {
-    return '관리자'
+  const author = notice?.author
+  if (!author) return '관리자'
+  if (typeof author === 'object') {
+    return author.username ?? '관리자'
   }
-  if (notice.author) {
-    if (typeof notice.author === 'object') {
-      return notice.author.username ?? '-'
-    }
-    return notice.author
-  }
-  return '-'
+  return author
 }
 
 function formatDate(dateString) {
