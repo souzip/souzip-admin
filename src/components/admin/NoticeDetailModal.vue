@@ -99,17 +99,13 @@ function getStatus() {
 }
 
 function formatAuthor() {
-  if (!props.notice) return '-'
-  if (props.notice.authorId) {
-    return '관리자'
+  if (!props.notice) return '관리자'
+  const author = props.notice.author
+  if (!author) return '관리자'
+  if (typeof author === 'object') {
+    return author.username ?? '관리자'
   }
-  if (props.notice.author) {
-    if (typeof props.notice.author === 'object') {
-      return props.notice.author.username ?? '-'
-    }
-    return props.notice.author
-  }
-  return '-'
+  return author
 }
 
 function formatDate(dateString) {
