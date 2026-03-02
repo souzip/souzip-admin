@@ -1,4 +1,3 @@
-<!-- src/components/admin/NoticeDetailModal.vue -->
 <template>
   <Teleport to="body">
     <Transition name="modal">
@@ -464,6 +463,12 @@ function getProcessedContent() {
 
   .btn {
     width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .content-viewer {
+    min-height: 80px;
   }
 }
 </style>
