@@ -465,8 +465,17 @@ function getProcessedContent() {
     justify-self: end;
   }
 
+  .modal-header {
+    padding: 12px 20px;
+  }
+
+  .modal-body {
+    padding: 12px 20px;
+  }
+
   .modal-footer {
     flex-direction: column-reverse;
+    padding: 12px 20px;
   }
 
   .btn {

@@ -218,7 +218,7 @@ function handleClose() {
 .modal-title {
   font-size: 16px;
   font-weight: 600;
-  color: #111827;
+  color: #1f2937;
 }
 
 .close-btn {
@@ -347,14 +347,27 @@ function handleClose() {
   transform: scale(0.95);
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .field-row {
     flex-direction: column;
     gap: 16px;
   }
 
+  .modal-header {
+    padding: 12px 20px;
+  }
+
+  .modal-body {
+    padding: 12px 20px;
+  }
+
   .modal-footer {
     flex-direction: column-reverse;
+    padding: 12px 20px;
+  }
+
+  .field-group {
+    gap: 6px;
   }
 }
 </style>

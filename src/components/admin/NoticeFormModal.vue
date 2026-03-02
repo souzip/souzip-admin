@@ -993,8 +993,17 @@ function onClose() {
 }
 
 @media (max-width: 1024px) {
+  .modal-header {
+    padding: 12px 20px;
+  }
+
+  .modal-body {
+    padding: 12px 20px;
+  }
+
   .modal-footer {
     flex-direction: column-reverse;
+    padding: 12px 20px;
   }
 
   .btn-secondary,
@@ -1087,7 +1096,7 @@ function onClose() {
   max-width: 100%;
   height: auto;
   border-radius: 6px;
-  margin: 8px 0; /* 작성 중에는 기존대로 */
+  margin: 8px 0;
   display: block;
 }
 
