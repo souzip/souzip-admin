@@ -347,7 +347,6 @@ function handleClose() {
   transform: scale(0.95);
 }
 
-/* 태블릿 이하: 위도/경도 및 버튼 컬럼 */
 @media (max-width: 768px) {
   .field-row {
     flex-direction: column;
