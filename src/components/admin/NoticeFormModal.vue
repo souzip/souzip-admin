@@ -790,7 +790,7 @@ function onClose() {
   padding: 8px 12px;
   border: 1px solid #e5e7eb;
   border-radius: 6px;
-  font-size: 14px;
+  font-size: 16px;
   transition: all 0.15s;
 }
 
@@ -1018,7 +1018,7 @@ function onClose() {
   padding: 14px 16px;
   min-height: 300px;
   outline: none;
-  font-size: 14px;
+  font-size: 16px;
   line-height: 1.7;
   color: #1f2937;
 }
