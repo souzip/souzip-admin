@@ -4,7 +4,7 @@
       <div v-if="isOpen" class="modal-overlay" @click.self="close">
         <div class="modal-container">
           <div class="modal-header">
-            <h3 class="modal-title">도시 이름 수정</h3>
+            <h3 class="modal-title">도시 수정</h3>
             <button type="button" class="close-button" @click="close">✕</button>
           </div>
 
@@ -207,6 +207,7 @@ function handleSubmit() {
   font-weight: 500;
   cursor: pointer;
   transition: all 0.15s;
+  width: 100%;
 }
 
 .btn-cancel {
