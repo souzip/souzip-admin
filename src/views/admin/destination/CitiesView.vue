@@ -48,6 +48,7 @@
       </div>
     </div>
 
+    <!-- PC: TABLE -->
     <div v-if="!isMobile" ref="scrollContainer" class="table-container" @scroll="handleScroll">
       <table class="data-table">
         <thead>
@@ -84,6 +85,7 @@
           <tr v-else-if="!loading && items.length === 0">
             <td :colspan="canEdit ? 6 : 5" class="empty-cell">등록된 도시가 없습니다.</td>
           </tr>
+
           <template v-else>
             <tr
               v-for="city in items"
@@ -135,7 +137,7 @@
                   type="button"
                   class="edit-icon"
                   @click="openEditModal(city)"
-                  title="도시 이름 수정"
+                  title="도시 수정"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -154,6 +156,7 @@
                 </button>
               </td>
             </tr>
+
             <tr v-if="loadingMore">
               <td :colspan="canEdit ? 6 : 5" class="loading-more-cell">
                 <div class="flex items-center justify-center gap-2">
@@ -168,6 +171,7 @@
       <div ref="sentinel" class="sentinel"></div>
     </div>
 
+    <!-- MOBILE: CARD -->
     <div v-else ref="scrollContainer" class="card-container" @scroll="handleScroll">
       <div v-if="loading && items.length === 0" class="loading-card">
         <span class="table-spinner"></span>불러오는 중
@@ -178,6 +182,7 @@
       <div v-else-if="!loading && items.length === 0" class="empty-card">
         등록된 도시가 없습니다.
       </div>
+
       <template v-else>
         <div
           v-for="city in items"
@@ -189,70 +194,84 @@
           }"
           @click="canEdit && toggleSelect(city.id)"
         >
+          <!-- ✅ 헤더에는 체크박스 + 수정만 -->
           <div class="card-header">
-            <input
-              v-if="canEdit"
-              type="checkbox"
-              class="rounded border-gray-300"
-              :checked="selectedIds.includes(city.id)"
-              @click.stop
-              @change="toggleSelect(city.id)"
-            />
+            <div class="card-header-left">
+              <input
+                v-if="canEdit"
+                type="checkbox"
+                class="rounded border-gray-300"
+                :checked="selectedIds.includes(city.id)"
+                @click.stop
+                @change="toggleSelect(city.id)"
+              />
+            </div>
+
             <button
               v-if="canEdit"
               type="button"
-              class="priority-badge"
-              :class="city.priority ? 'priority-set' : 'priority-unset'"
-              @click.stop="startEditPriority(city)"
+              class="edit-mobile"
+              @click.stop="openEditModal(city)"
+              aria-label="도시 편집"
+              title="도시 편집"
             >
-              우선순위: {{ city.priority ?? '미설정' }}
+              수정
             </button>
-            <span
-              v-else
-              class="priority-badge"
-              :class="city.priority ? 'priority-set' : 'priority-unset'"
-            >
-              우선순위: {{ city.priority ?? '미설정' }}
-            </span>
           </div>
+
           <div class="card-body">
+            <div class="card-field" @click.stop>
+              <span class="card-label">우선순위</span>
+
+              <template v-if="canEdit">
+                <input
+                  v-if="editingPriorityId === city.id"
+                  v-model="editingPriorityValue"
+                  v-focus
+                  type="number"
+                  min="1"
+                  class="priority-input"
+                  @keyup.enter="savePriority(city.id)"
+                  @keyup.esc="cancelPriority"
+                  @blur="savePriority(city.id)"
+                />
+                <button
+                  v-else
+                  type="button"
+                  class="priority-badge"
+                  :class="city.priority ? 'priority-set' : 'priority-unset'"
+                  @click.stop="startEditPriority(city)"
+                >
+                  {{ city.priority ?? '미설정' }}
+                </button>
+              </template>
+
+              <span
+                v-else
+                class="priority-badge"
+                :class="city.priority ? 'priority-set' : 'priority-unset'"
+              >
+                {{ city.priority ?? '미설정' }}
+              </span>
+            </div>
+
             <div class="card-field">
               <span class="card-label">한글명</span>
-              <div class="card-value-with-edit">
-                <span class="card-value">{{ city.nameKr }}</span>
-                <button
-                  v-if="canEdit"
-                  type="button"
-                  class="edit-icon-mobile"
-                  @click.stop="openEditModal(city)"
-                >
-                  수정
-                </button>
-              </div>
+              <span class="card-value">{{ city.nameKr }}</span>
             </div>
+
             <div class="card-field">
               <span class="card-label">영문명</span>
               <span class="card-value">{{ city.nameEn }}</span>
             </div>
+
             <div class="card-field">
               <span class="card-label">수정일</span>
               <span class="card-value text-gray-500">{{ formatDate(city.updatedAt) }}</span>
             </div>
-            <div v-if="canEdit && editingPriorityId === city.id" class="card-field" @click.stop>
-              <span class="card-label">우선순위 입력</span>
-              <input
-                v-model="editingPriorityValue"
-                v-focus
-                type="number"
-                min="1"
-                class="priority-input"
-                @keyup.enter="savePriority(city.id)"
-                @keyup.esc="cancelPriority"
-                @blur="savePriority(city.id)"
-              />
-            </div>
           </div>
         </div>
+
         <div v-if="loadingMore" class="loading-more-card">
           <div class="flex items-center justify-center gap-2">
             <div class="loading-spinner"></div>
@@ -260,6 +279,7 @@
           </div>
         </div>
       </template>
+
       <div ref="sentinel" class="sentinel"></div>
     </div>
 
@@ -792,6 +812,23 @@ function formatDate(dateString) {
   padding-bottom: 10px;
   border-bottom: 1px solid #f3f4f6;
 }
+
+.card-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.edit-mobile {
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: #f3f4f6;
+  color: #374151;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
 .card-body {
   display: flex;
   flex-direction: column;
@@ -810,28 +847,6 @@ function formatDate(dateString) {
 .card-value {
   font-size: 13px;
   color: #1f2937;
-}
-
-.card-value-with-edit {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.edit-icon-mobile {
-  padding: 4px 10px;
-  font-size: 11px;
-  background: #f3f4f6;
-  color: #6b7280;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-
-.edit-icon-mobile:hover {
-  background: #ff7738;
-  color: white;
 }
 
 .loading-card,
@@ -877,9 +892,6 @@ function formatDate(dateString) {
   }
   .filter-actions button {
     width: 100%;
-  }
-  .priority-input {
-    font-size: 16px;
   }
 }
 
