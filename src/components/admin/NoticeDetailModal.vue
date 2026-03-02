@@ -175,7 +175,7 @@ function getProcessedContent() {
 }
 
 .modal-title {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
   color: #1f2937;
 }
@@ -453,8 +453,16 @@ function getProcessedContent() {
 
 @media (max-width: 1024px) {
   .detail-field {
-    grid-template-columns: 1fr;
-    gap: 8px;
+    grid-template-rows: 1fr;
+    gap: 4px;
+  }
+
+  .field-value {
+    justify-self: end;
+  }
+
+  .status-badge {
+    justify-self: end;
   }
 
   .modal-footer {
@@ -467,8 +475,22 @@ function getProcessedContent() {
 }
 
 @media (max-width: 768px) {
-  .content-viewer {
-    min-height: 80px;
+  .detail-section {
+    gap: 12px;
+  }
+}
+
+@media (max-width: 350px) {
+  .detail-field {
+    grid-template-columns: 1fr;
+  }
+
+  .field-value {
+    justify-self: start;
+  }
+
+  .status-badge {
+    justify-self: start;
   }
 }
 </style>
