@@ -462,8 +462,21 @@ function handleClose() {
 }
 
 @media (max-width: 1024px) {
+  .modal-header {
+    padding: 12px 20px;
+  }
+
+  .modal-body {
+    padding: 12px 20px;
+  }
+
   .modal-footer {
     flex-direction: column-reverse;
+    padding: 12px 20px;
+  }
+
+  .modal-body form {
+    gap: 12px;
   }
 
   .btn {
@@ -474,22 +487,6 @@ function handleClose() {
 @media (max-width: 768px) {
   .modal-overlay {
     padding: 16px;
-  }
-
-  .modal-header {
-    padding: 16px 20px;
-  }
-
-  .modal-body {
-    padding: 20px;
-  }
-
-  .modal-footer {
-    padding: 16px 20px;
-  }
-
-  .form-group {
-    margin-bottom: 16px;
   }
 }
 </style>

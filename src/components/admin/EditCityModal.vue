@@ -133,9 +133,9 @@ function handleSubmit() {
 }
 
 .modal-title {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
-  color: #111827;
+  color: #1f2937;
 }
 
 .close-button {
@@ -193,7 +193,7 @@ function handleSubmit() {
 
 .modal-footer {
   display: flex;
-  gap: 12px;
+  gap: 8px;
   padding: 16px 24px;
   border-top: 1px solid #e5e7eb;
   justify-content: flex-end;
@@ -252,5 +252,24 @@ function handleSubmit() {
 .modal-enter-from .modal-container,
 .modal-leave-to .modal-container {
   transform: scale(0.95);
+}
+
+@media (max-width: 1024px) {
+  .modal-header {
+    padding: 12px 20px;
+  }
+
+  .modal-body {
+    padding: 12px 20px;
+  }
+
+  .modal-footer {
+    flex-direction: column-reverse;
+    padding: 12px 20px;
+  }
+
+  .field-group {
+    gap: 6px;
+  }
 }
 </style>
