@@ -300,7 +300,7 @@
           <div class="modal-footer">
             <button type="button" class="btn-secondary" @click="onClose">취소</button>
             <button type="submit" form="notice-form" class="btn-primary" :disabled="submitting">
-              {{ isEdit ? '완료' : '등록' }}
+              {{ isEdit ? '저장' : '등록' }}
             </button>
           </div>
         </div>
