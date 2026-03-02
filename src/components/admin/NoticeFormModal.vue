@@ -1111,4 +1111,14 @@ function onClose() {
 .editor-content .ProseMirror [style*='text-align: left'] {
   text-align: left;
 }
+
+@media (max-width: 768px) {
+  .editor-container {
+    max-height: 300px;
+  }
+
+  .editor-content .ProseMirror {
+    padding: 6px 8px;
+  }
+}
 </style>
