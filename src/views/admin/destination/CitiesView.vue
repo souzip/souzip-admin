@@ -194,7 +194,6 @@
           }"
           @click="canEdit && toggleSelect(city.id)"
         >
-          <!-- ✅ 헤더에는 체크박스 + 수정만 -->
           <div class="card-header">
             <div class="card-header-left">
               <input
@@ -735,7 +734,7 @@ function formatDate(dateString) {
   padding: 3px 8px;
   border: 1px solid #ff7738;
   border-radius: 4px;
-  font-size: 13px;
+  font-size: 16px;
   text-align: center;
   outline: none;
   box-shadow: 0 0 0 2px rgba(255, 119, 56, 0.2);
