@@ -172,7 +172,7 @@ function handleSubmit() {
 
 .form-label {
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   color: #374151;
 }
 
@@ -181,7 +181,7 @@ function handleSubmit() {
   padding: 10px 12px;
   border: 1px solid #d1d5db;
   border-radius: 8px;
-  font-size: 14px;
+  font-size: 16px;
   outline: none;
   transition: border-color 0.15s;
 }

@@ -286,6 +286,11 @@ function handleClose() {
   transition: all 0.2s;
 }
 
+.label-base {
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+}
 .modal-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
