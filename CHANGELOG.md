@@ -1,3 +1,9 @@
+## [1.8.2](https://github.com/souzip/souzip-admin/compare/v1.8.1...v1.8.2) (2026-03-11)
+
+### Bug Fixes
+
+- 수정 ([8765fb8](https://github.com/souzip/souzip-admin/commit/8765fb89e05462cd63ce6097260640ff6c69855d))
+
 ## [1.8.1](https://github.com/souzip/souzip-admin/compare/v1.8.0...v1.8.1) (2026-03-11)
 
 ### Bug Fixes
