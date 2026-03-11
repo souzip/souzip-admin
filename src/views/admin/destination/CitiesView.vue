@@ -542,7 +542,7 @@ function formatDate(dateString) {
   if (!dateString) return '-'
   const utc = dateString.endsWith('Z') ? dateString : dateString + 'Z'
   return new Date(utc).toLocaleString('ko-KR', {
-    timeZone: 'Asia/Seoul',
+    timeZone: 'UTC',
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',
