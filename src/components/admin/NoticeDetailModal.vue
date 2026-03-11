@@ -111,7 +111,7 @@ function formatDate(dateString) {
   if (!dateString) return '-'
   const utcString = dateString.endsWith('Z') ? dateString : dateString + 'Z'
   return new Date(utcString).toLocaleString('ko-KR', {
-    timeZone: 'Asia/Seoul',
+    timeZone: 'UTC',
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',
