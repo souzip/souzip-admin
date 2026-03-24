@@ -8,6 +8,7 @@ import AdminManagement from '@/views/admin/management/AdminManagement.vue'
 // import CountriesView from '@/views/admin/destination/CountriesView.vue'
 import CitiesView from '@/views/admin/destination/CitiesView.vue'
 import NoticesView from '@/views/admin/notice/NoticesView.vue'
+import MessagePushView from '@/views/admin/message/MessagePushView.vue'
 
 const routes = [
   { path: '/', redirect: '/admin/cities' },
@@ -37,6 +38,11 @@ const routes = [
         path: 'cities',
         name: 'admin-cities',
         component: CitiesView,
+      },
+      {
+        path: 'message-push',
+        name: 'admin-message-push',
+        component: MessagePushView,
       },
       {
         path: 'notices',
