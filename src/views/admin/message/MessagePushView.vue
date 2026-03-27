@@ -31,163 +31,267 @@
       </div>
     </div>
 
-    <div v-if="!canSend" class="push-restrict">
-      <svg class="push-restrict-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="1.5"
-          d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-        />
-      </svg>
-      <div class="push-restrict-text">
-        <p v-if="isViewerRole">
-          현재 계정은 <span class="font-semibold">조회 전용(VIEWER)</span>입니다. 푸시 발송은
-          <span class="font-semibold">ADMIN</span> 또는
-          <span class="font-semibold">SUPER_ADMIN</span>
-          권한이 필요합니다.
-        </p>
-        <p v-else-if="!hasAdminRole">
-          역할 정보를 확인할 수 없습니다. 다시 로그인한 뒤 이용해 주세요.
-        </p>
-        <p v-else>이 기능은 <span class="font-semibold">ADMIN</span> 이상만 사용할 수 있습니다.</p>
-      </div>
-    </div>
+    <nav class="push-tabs" aria-label="푸시 메뉴">
+      <button
+        type="button"
+        class="push-tab"
+        :class="{ 'push-tab-active': activeTab === 'send' }"
+        @click="activeTab = 'send'"
+      >
+        메시지 발송
+      </button>
+      <button
+        type="button"
+        class="push-tab"
+        :class="{ 'push-tab-active': activeTab === 'history' }"
+        @click="activeTab = 'history'"
+      >
+        알람발송내역
+      </button>
+    </nav>
 
-    <form v-else class="push-form-card" @submit.prevent="handleSubmit">
-      <div class="push-form-head">
-        <h2 class="push-form-title">알림 내용</h2>
-        <p class="push-form-hint">발송 전 내용을 한 번 더 확인해 주세요.</p>
-      </div>
-
-      <div class="push-field">
-        <div class="push-label-row">
-          <label for="push-title" class="label-base">제목</label>
-          <span class="push-counter" :class="{ 'push-counter-warn': titleLen >= 180 }">
-            {{ titleLen }} / 200
-          </span>
-        </div>
-        <input
-          id="push-title"
-          v-model="form.title"
-          type="text"
-          class="input-base push-input"
-          maxlength="200"
-          required
-          placeholder="예: 새로운 이벤트가 시작되었어요"
-          :disabled="sending"
-        />
-      </div>
-
-      <div class="push-field">
-        <div class="push-label-row">
-          <label for="push-body" class="label-base">내용</label>
-          <span class="push-counter" :class="{ 'push-counter-warn': bodyLen >= 900 }">
-            {{ bodyLen }} / 1000
-          </span>
-        </div>
-        <textarea
-          id="push-body"
-          v-model="form.body"
-          class="input-base push-textarea"
-          rows="6"
-          maxlength="1000"
-          required
-          placeholder="알림 본문을 입력하세요. 짧고 명확할수록 좋습니다."
-          :disabled="sending"
-        />
-      </div>
-
-      <div v-if="errorMessage" class="push-alert push-alert-error">
-        <svg class="push-alert-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+    <div v-show="activeTab === 'send'">
+      <div v-if="!canSend" class="push-restrict">
+        <svg class="push-restrict-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
           <path
             stroke-linecap="round"
             stroke-linejoin="round"
-            stroke-width="2"
-            d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            stroke-width="1.5"
+            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
           />
         </svg>
-        <span>{{ errorMessage }}</span>
-      </div>
-
-      <div v-if="resultMessage" class="push-alert" :class="resultAlertClass">
-        <svg
-          v-if="resultIsWarning"
-          class="push-alert-ic shrink-0"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-          />
-        </svg>
-        <svg
-          v-else
-          class="push-alert-ic shrink-0"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-          />
-        </svg>
-        <div class="push-result-text whitespace-pre-wrap">{{ resultMessage }}</div>
-      </div>
-
-      <div v-if="lastStats" class="push-stats">
-        <div class="push-stat">
-          <span class="push-stat-label">대상</span>
-          <span class="push-stat-value">{{ lastStats.total }}</span>
-        </div>
-        <div class="push-stat push-stat-ok">
-          <span class="push-stat-label">성공</span>
-          <span class="push-stat-value">{{ lastStats.success }}</span>
-        </div>
-        <div class="push-stat" :class="{ 'push-stat-bad': lastStats.fail > 0 }">
-          <span class="push-stat-label">실패</span>
-          <span class="push-stat-value">{{ lastStats.fail }}</span>
+        <div class="push-restrict-text">
+          <p v-if="isViewerRole">
+            현재 계정은 <span class="font-semibold">조회 전용(VIEWER)</span>입니다. 푸시 발송은
+            <span class="font-semibold">ADMIN</span> 또는
+            <span class="font-semibold">SUPER_ADMIN</span>
+            권한이 필요합니다.
+          </p>
+          <p v-else-if="!hasAdminRole">
+            역할 정보를 확인할 수 없습니다. 다시 로그인한 뒤 이용해 주세요.
+          </p>
+          <p v-else>
+            이 기능은 <span class="font-semibold">ADMIN</span> 이상만 사용할 수 있습니다.
+          </p>
         </div>
       </div>
 
-      <div class="push-actions">
-        <button
-          type="submit"
-          class="push-submit"
-          :disabled="sending || !form.title.trim() || !form.body.trim()"
-        >
-          <span v-if="sending" class="push-spinner" aria-hidden="true" />
+      <form v-else class="push-form-card" @submit.prevent="handleSubmit">
+        <div class="push-form-head">
+          <h2 class="push-form-title">알림 내용</h2>
+          <p class="push-form-hint">발송 전 내용을 한 번 더 확인해 주세요.</p>
+        </div>
+
+        <div class="push-field">
+          <div class="push-label-row">
+            <label for="push-title" class="label-base">제목</label>
+            <span class="push-counter" :class="{ 'push-counter-warn': titleLen >= 180 }">
+              {{ titleLen }} / 200
+            </span>
+          </div>
+          <input
+            id="push-title"
+            v-model="form.title"
+            type="text"
+            class="input-base push-input"
+            maxlength="200"
+            required
+            placeholder="예: 새로운 이벤트가 시작되었어요"
+            :disabled="sending"
+          />
+        </div>
+
+        <div class="push-field">
+          <div class="push-label-row">
+            <label for="push-body" class="label-base">내용</label>
+            <span class="push-counter" :class="{ 'push-counter-warn': bodyLen >= 900 }">
+              {{ bodyLen }} / 1000
+            </span>
+          </div>
+          <textarea
+            id="push-body"
+            v-model="form.body"
+            class="input-base push-textarea"
+            rows="6"
+            maxlength="1000"
+            required
+            placeholder="알림 본문을 입력하세요. 짧고 명확할수록 좋습니다."
+            :disabled="sending"
+          />
+        </div>
+
+        <div v-if="errorMessage" class="push-alert push-alert-error">
+          <svg class="push-alert-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+          <span>{{ errorMessage }}</span>
+        </div>
+
+        <div v-if="resultMessage" class="push-alert" :class="resultAlertClass">
           <svg
-            v-else
-            class="push-submit-icon"
+            v-if="resultIsWarning"
+            class="push-alert-ic shrink-0"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
-            aria-hidden="true"
           >
             <path
               stroke-linecap="round"
               stroke-linejoin="round"
               stroke-width="2"
-              d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
             />
           </svg>
-          {{ sending ? '발송 중…' : '푸시 발송' }}
-        </button>
+          <svg
+            v-else
+            class="push-alert-ic shrink-0"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+          <div class="push-result-text whitespace-pre-wrap">{{ resultMessage }}</div>
+        </div>
+
+        <div v-if="lastStats" class="push-stats">
+          <div class="push-stat">
+            <span class="push-stat-label">대상</span>
+            <span class="push-stat-value">{{ lastStats.total }}</span>
+          </div>
+          <div class="push-stat push-stat-ok">
+            <span class="push-stat-label">성공</span>
+            <span class="push-stat-value">{{ lastStats.success }}</span>
+          </div>
+          <div class="push-stat" :class="{ 'push-stat-bad': lastStats.fail > 0 }">
+            <span class="push-stat-label">실패</span>
+            <span class="push-stat-value">{{ lastStats.fail }}</span>
+          </div>
+        </div>
+
+        <div class="push-actions">
+          <button
+            type="submit"
+            class="push-submit"
+            :disabled="sending || !form.title.trim() || !form.body.trim()"
+          >
+            <span v-if="sending" class="push-spinner" aria-hidden="true" />
+            <svg
+              v-else
+              class="push-submit-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              aria-hidden="true"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+              />
+            </svg>
+            {{ sending ? '발송 중…' : '푸시 발송' }}
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <div v-show="activeTab === 'history'" class="push-history">
+      <div v-if="historyError" class="push-alert push-alert-error push-history-alert">
+        <span>{{ historyError }}</span>
       </div>
-    </form>
+      <div class="push-history-card">
+        <div class="push-history-head">
+          <h2 class="push-form-title">발송 이력</h2>
+          <p class="push-form-hint">최근 브로드캐스트 푸시 기준으로 최신순입니다.</p>
+        </div>
+        <div v-if="historyLoading && historyRows.length === 0" class="push-history-loading">
+          불러오는 중…
+        </div>
+        <div v-else-if="!historyLoading && historyRows.length === 0" class="push-history-empty">
+          저장된 발송 이력이 없습니다.
+        </div>
+        <div v-else class="push-history-table-wrap">
+          <table class="push-history-table">
+            <thead>
+              <tr>
+                <th class="col-when">발송일시</th>
+                <th class="col-title">제목</th>
+                <th class="col-body">내용</th>
+                <th class="col-num">대상</th>
+                <th class="col-num">성공</th>
+                <th class="col-num">실패</th>
+                <th class="col-fb">Firebase</th>
+                <th class="col-admin">관리자</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="row in historyRows" :key="row.id">
+                <td class="col-when whitespace-nowrap">{{ formatDateTime(row.createdAt) }}</td>
+                <td class="col-title-cell">{{ row.title || '—' }}</td>
+                <td class="col-body">
+                  <span class="push-body-clip" :title="row.body">{{ row.body || '—' }}</span>
+                </td>
+                <td class="col-num">{{ row.totalTargets }}</td>
+                <td class="col-num text-emerald-700">{{ row.successCount }}</td>
+                <td class="col-num" :class="{ 'text-red-700': row.failCount > 0 }">
+                  {{ row.failCount }}
+                </td>
+                <td class="col-fb">
+                  <span
+                    class="push-fb-badge"
+                    :class="row.firebaseConfigured ? 'push-fb-on' : 'push-fb-off'"
+                  >
+                    {{ row.firebaseConfigured ? '설정' : '미설정' }}
+                  </span>
+                </td>
+                <td class="col-admin font-mono text-xs">{{ shortAdminId(row.adminId) }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div v-if="historyPagination && historyRows.length > 0" class="push-history-pager">
+          <span class="push-pager-info">
+            {{ historyPagination.currentPage }} / {{ historyPagination.totalPages || 1 }} 페이지
+            <span class="push-pager-total">· 전체 {{ historyPagination.totalItems }}건</span>
+          </span>
+          <div class="push-pager-btns">
+            <button
+              type="button"
+              class="push-pager-btn"
+              :disabled="historyLoading || !historyPagination.hasPrevious"
+              @click="goHistoryPage(historyPagination.currentPage - 1)"
+            >
+              이전
+            </button>
+            <button
+              type="button"
+              class="push-pager-btn"
+              :disabled="historyLoading || !historyPagination.hasNext"
+              @click="goHistoryPage(historyPagination.currentPage + 1)"
+            >
+              다음
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { reactive, ref, computed } from 'vue'
+import { reactive, ref, computed, watch } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import client from '@/api/Client'
 
@@ -201,6 +305,14 @@ const canSend = computed(() => {
 const hasAdminRole = computed(() => Boolean(auth.admin?.role))
 
 const isViewerRole = computed(() => auth.admin?.role === 'VIEWER')
+
+const activeTab = ref('send')
+const historyRows = ref([])
+const historyPagination = ref(null)
+const historyLoading = ref(false)
+const historyError = ref('')
+const historyPageNo = ref(1)
+const HISTORY_PAGE_SIZE = 10
 
 const form = reactive({
   title: '',
@@ -261,13 +373,290 @@ async function handleSubmit() {
     sending.value = false
   }
 }
+
+function goHistoryPage(page) {
+  if (page < 1) return
+  loadHistory(page)
+}
+
+async function loadHistory(pageNo) {
+  historyError.value = ''
+  historyLoading.value = true
+  historyPageNo.value = pageNo
+  try {
+    const res = await client.get('/api/admin/push/broadcast/history', {
+      params: { pageNo, pageSize: HISTORY_PAGE_SIZE },
+    })
+    const wrapped = res.data?.data
+    historyRows.value = wrapped?.content ?? []
+    historyPagination.value = wrapped?.pagination ?? null
+  } catch (e) {
+    historyError.value = e?.response?.data?.message || '이력을 불러오지 못했습니다.'
+    historyRows.value = []
+    historyPagination.value = null
+  } finally {
+    historyLoading.value = false
+  }
+}
+
+watch(activeTab, (tab) => {
+  if (tab === 'history') {
+    loadHistory(historyPageNo.value)
+  }
+})
+
+function formatDateTime(v) {
+  if (v == null || v === '') return '—'
+  if (Array.isArray(v) && v.length >= 3) {
+    const [y, mo, d, h = 0, mi = 0] = v
+    const dt = new Date(y, mo - 1, d, h, mi)
+    if (!Number.isNaN(dt.getTime())) {
+      return dt.toLocaleString('ko-KR', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+      })
+    }
+  }
+  const s = typeof v === 'string' ? v : String(v)
+  const dt = new Date(s)
+  if (Number.isNaN(dt.getTime())) return s
+  return dt.toLocaleString('ko-KR', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
+
+function shortAdminId(uuid) {
+  if (uuid == null || uuid === '') return '—'
+  const t = String(uuid)
+  return t.length > 10 ? `${t.slice(0, 8)}…` : t
+}
 </script>
 
 <style scoped>
 .push-layout {
-  max-width: 42rem;
+  max-width: min(100%, 72rem);
   margin: 0 auto;
   padding: 1.75rem 4px 2rem;
+}
+
+.push-tabs {
+  display: flex;
+  gap: 0.25rem;
+  margin-bottom: 1.25rem;
+  padding: 0.25rem;
+  border-radius: 0.875rem;
+  background: rgb(243 244 246);
+  border: 1px solid rgb(229 231 235);
+}
+
+.push-tab {
+  flex: 1;
+  padding: 0.625rem 0.75rem;
+  border: none;
+  border-radius: 0.625rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: rgb(107 114 128);
+  background: transparent;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+}
+
+.push-tab:hover {
+  color: rgb(55 65 81);
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.push-tab-active {
+  color: rgb(17 24 39);
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.push-history {
+  margin-top: 0.25rem;
+}
+
+.push-history-alert {
+  margin-bottom: 1rem;
+}
+
+.push-history-card {
+  background: #fff;
+  border-radius: 1rem;
+  border: 1px solid rgb(229 231 235);
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.06),
+    0 8px 32px -12px rgba(0, 0, 0, 0.08);
+  padding: 1.25rem 1rem 1.5rem;
+  overflow: hidden;
+}
+
+@media (min-width: 640px) {
+  .push-history-card {
+    padding: 1.5rem 1.5rem 1.5rem;
+  }
+}
+
+.push-history-head {
+  margin-bottom: 1rem;
+  padding-bottom: 0.875rem;
+  border-bottom: 1px solid rgb(243 244 246);
+}
+
+.push-history-loading,
+.push-history-empty {
+  text-align: center;
+  padding: 2.5rem 1rem;
+  font-size: 0.875rem;
+  color: rgb(107 114 128);
+}
+
+.push-history-table-wrap {
+  overflow-x: auto;
+  margin: 0 -0.25rem;
+}
+
+.push-history-table {
+  width: 100%;
+  min-width: 640px;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+}
+
+.push-history-table th {
+  text-align: left;
+  padding: 0.5rem 0.625rem;
+  font-weight: 600;
+  color: rgb(75 85 99);
+  border-bottom: 1px solid rgb(229 231 235);
+  white-space: nowrap;
+}
+
+.push-history-table td {
+  padding: 0.625rem 0.625rem;
+  border-bottom: 1px solid rgb(243 244 246);
+  vertical-align: top;
+  color: rgb(31 41 55);
+}
+
+.push-history-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.col-when {
+  width: 1%;
+}
+
+.col-title {
+  width: 12%;
+}
+
+.col-title-cell {
+  max-width: 8rem;
+  word-break: break-word;
+}
+
+.col-body {
+  min-width: 8rem;
+  max-width: 14rem;
+}
+
+.push-body-clip {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
+  line-height: 1.45;
+}
+
+.col-num {
+  width: 1%;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.col-fb {
+  width: 1%;
+  white-space: nowrap;
+}
+
+.col-admin {
+  width: 1%;
+}
+
+.push-fb-badge {
+  display: inline-block;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  padding: 0.15rem 0.4rem;
+  border-radius: 0.375rem;
+}
+
+.push-fb-on {
+  background: rgba(16, 185, 129, 0.12);
+  color: rgb(4 120 87);
+}
+
+.push-fb-off {
+  background: rgb(243 244 246);
+  color: rgb(107 114 128);
+}
+
+.push-history-pager {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgb(243 244 246);
+}
+
+.push-pager-info {
+  font-size: 0.8125rem;
+  color: rgb(75 85 99);
+}
+
+.push-pager-total {
+  color: rgb(156 163 175);
+}
+
+.push-pager-btns {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.push-pager-btn {
+  padding: 0.45rem 0.9rem;
+  border-radius: 0.5rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  border: 1px solid rgb(229 231 235);
+  background: #fff;
+  color: rgb(55 65 81);
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.push-pager-btn:hover:not(:disabled) {
+  background: rgb(249 250 251);
+}
+
+.push-pager-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 @media (min-width: 640px) {
