@@ -100,9 +100,9 @@
           </div>
         </div>
 
-        <!-- 메시지 발송 (ADMIN·SUPER_ADMIN만) -->
+        <!-- 메시지 발송 · 알람 발송 내역 (VIEWER는 조회만) -->
         <RouterLink
-          v-if="canPushBroadcast"
+          v-if="canAccessMessagePush"
           to="/admin/message-push"
           class="nav-item"
           active-class="nav-active"
@@ -259,9 +259,9 @@ const isSupportOpen = ref(false)
 
 const isSuperAdmin = computed(() => auth.admin?.role === 'SUPER_ADMIN')
 
-const canPushBroadcast = computed(() => {
+const canAccessMessagePush = computed(() => {
   const r = auth.admin?.role
-  return r === 'SUPER_ADMIN' || r === 'ADMIN'
+  return r === 'SUPER_ADMIN' || r === 'ADMIN' || r === 'VIEWER'
 })
 
 const isDestinationActive = computed(() => route.path.includes('/admin/cities'))
