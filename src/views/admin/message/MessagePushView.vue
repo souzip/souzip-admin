@@ -48,6 +48,14 @@
       >
         알람발송내역
       </button>
+      <button
+        type="button"
+        class="push-tab"
+        :class="{ 'push-tab-active': activeTab === 'email' }"
+        @click="activeTab = 'email'"
+      >
+        이메일 테스트
+      </button>
     </nav>
 
     <div v-show="activeTab === 'send'">
@@ -287,6 +295,134 @@
         </div>
       </div>
     </div>
+
+    <div v-show="activeTab === 'email'" class="push-email-dev">
+      <div v-if="!canSend" class="push-restrict">
+        <svg class="push-restrict-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="1.5"
+            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+          />
+        </svg>
+        <div class="push-restrict-text">
+          <p>이메일 테스트는 <span class="font-semibold">ADMIN</span> 이상만 사용할 수 있습니다.</p>
+        </div>
+      </div>
+
+      <div v-else class="push-form-card push-email-card">
+        <div class="push-form-head">
+          <h2 class="push-form-title">SMTP 테스트 (임시)</h2>
+          <p class="push-form-hint">
+            아래 제목·본문으로 발송합니다. 「테스트 메일」은 수신 한 곳만, 「전체 회원」은 DB에 있는
+            고유 이메일 전체(탈퇴 제외)입니다.
+          </p>
+        </div>
+
+        <div class="push-field">
+          <label for="email-test-to" class="label-base">수신 이메일</label>
+          <input
+            id="email-test-to"
+            v-model="emailForm.to"
+            type="email"
+            class="input-base push-input"
+            autocomplete="email"
+            placeholder="name@example.com"
+            :disabled="emailBusy"
+          />
+        </div>
+
+        <div class="push-field">
+          <div class="push-label-row">
+            <label for="email-test-subject" class="label-base">제목</label>
+            <span class="push-counter">{{ emailForm.subject.length }} / 200</span>
+          </div>
+          <input
+            id="email-test-subject"
+            v-model="emailForm.subject"
+            type="text"
+            class="input-base push-input"
+            maxlength="200"
+            :disabled="emailBusy"
+          />
+        </div>
+
+        <div class="push-field">
+          <div class="push-label-row">
+            <label for="email-test-body" class="label-base">본문</label>
+            <span class="push-counter">{{ emailForm.body.length }} / 20000</span>
+          </div>
+          <textarea
+            id="email-test-body"
+            v-model="emailForm.body"
+            class="input-base push-textarea"
+            rows="5"
+            maxlength="20000"
+            :disabled="emailBusy"
+          />
+        </div>
+
+        <div v-if="emailError" class="push-alert push-alert-error">
+          <span>{{ emailError }}</span>
+        </div>
+
+        <div v-if="emailResultMessage" class="push-alert" :class="emailResultAlertClass">
+          <div class="push-result-text whitespace-pre-wrap">{{ emailResultMessage }}</div>
+        </div>
+
+        <div v-if="emailLastStats" class="push-stats">
+          <div class="push-stat">
+            <span class="push-stat-label">대상</span>
+            <span class="push-stat-value">{{ emailLastStats.total }}</span>
+          </div>
+          <div class="push-stat push-stat-ok">
+            <span class="push-stat-label">성공</span>
+            <span class="push-stat-value">{{ emailLastStats.success }}</span>
+          </div>
+          <div class="push-stat" :class="{ 'push-stat-bad': emailLastStats.fail > 0 }">
+            <span class="push-stat-label">실패</span>
+            <span class="push-stat-value">{{ emailLastStats.fail }}</span>
+          </div>
+        </div>
+
+        <div class="push-actions push-email-actions push-email-actions-row">
+          <button
+            type="button"
+            class="push-submit push-email-btn"
+            :disabled="
+              emailBusy ||
+              !emailForm.to.trim() ||
+              !emailForm.subject.trim() ||
+              !emailForm.body.trim()
+            "
+            @click="handleEmailTestSend"
+          >
+            <span v-if="emailTestSending" class="push-spinner" aria-hidden="true" />
+            {{ emailTestSending ? '발송 중…' : '테스트 메일 발송' }}
+          </button>
+          <button
+            type="button"
+            class="push-submit push-email-btn-broadcast"
+            :disabled="emailBusy || !emailForm.subject.trim() || !emailForm.body.trim()"
+            @click="openEmailBroadcastConfirm"
+          >
+            <span v-if="emailBroadcastSending" class="push-spinner" aria-hidden="true" />
+            {{ emailBroadcastSending ? '전체 발송 중…' : '전체 회원 이메일 발송' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <ConfirmModal
+      :is-open="showEmailBroadcastConfirm"
+      type="danger"
+      :message="emailBroadcastConfirmMessage"
+      confirm-text="전체 발송"
+      cancel-text="취소"
+      @confirm="confirmEmailBroadcast"
+      @cancel="showEmailBroadcastConfirm = false"
+    />
   </div>
 </template>
 
@@ -294,6 +430,7 @@
 import { reactive, ref, computed, watch } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import client from '@/api/Client'
+import ConfirmModal from '@/components/ConfirmModal.vue'
 
 const auth = useAuthStore()
 
@@ -307,6 +444,103 @@ const hasAdminRole = computed(() => Boolean(auth.admin?.role))
 const isViewerRole = computed(() => auth.admin?.role === 'VIEWER')
 
 const activeTab = ref('send')
+
+const emailForm = reactive({
+  to: 'johoon030@gmail.com',
+  subject: '[souzip] SMTP 테스트',
+  body: '관리자 화면에서 보낸 테스트 메일입니다.',
+})
+const emailTestSending = ref(false)
+const emailBroadcastSending = ref(false)
+const emailBusy = computed(() => emailTestSending.value || emailBroadcastSending.value)
+const showEmailBroadcastConfirm = ref(false)
+const emailError = ref('')
+const emailResultMessage = ref('')
+const emailLastStats = ref(null)
+const emailSmtpConfigured = ref(true)
+
+const emailBroadcastConfirmMessage = computed(() => {
+  const sub = emailForm.subject.trim() || '(제목 없음)'
+  return `「${sub}」제목으로 탈퇴하지 않은 회원 중 이메일이 있는 고유 주소 전체로 발송합니다. 되돌릴 수 없습니다. 계속할까요?`
+})
+
+const emailResultAlertClass = computed(() => {
+  if (!emailResultMessage.value) return ''
+  const warn =
+    !emailSmtpConfigured.value ||
+    (emailLastStats.value && (emailLastStats.value.total === 0 || emailLastStats.value.fail > 0))
+  return warn ? 'push-alert-warn' : 'push-alert-success'
+})
+
+function openEmailBroadcastConfirm() {
+  emailError.value = ''
+  showEmailBroadcastConfirm.value = true
+}
+
+async function confirmEmailBroadcast() {
+  showEmailBroadcastConfirm.value = false
+  await handleEmailBroadcastSend()
+}
+
+async function handleEmailTestSend() {
+  emailError.value = ''
+  emailResultMessage.value = ''
+  emailLastStats.value = null
+  emailTestSending.value = true
+  try {
+    const res = await client.post('/api/admin/email/test-send', {
+      to: emailForm.to.trim(),
+      subject: emailForm.subject.trim(),
+      body: emailForm.body.trim(),
+    })
+    applyEmailApiResult(res)
+  } catch (e) {
+    emailError.value = e?.response?.data?.message || '테스트 메일 발송에 실패했습니다.'
+  } finally {
+    emailTestSending.value = false
+  }
+}
+
+async function handleEmailBroadcastSend() {
+  emailError.value = ''
+  emailResultMessage.value = ''
+  emailLastStats.value = null
+  emailBroadcastSending.value = true
+  try {
+    const res = await client.post('/api/admin/email/broadcast', {
+      subject: emailForm.subject.trim(),
+      body: emailForm.body.trim(),
+    })
+    applyEmailApiResult(res)
+  } catch (e) {
+    emailError.value = e?.response?.data?.message || '전체 이메일 발송에 실패했습니다.'
+  } finally {
+    emailBroadcastSending.value = false
+  }
+}
+
+function applyEmailApiResult(res) {
+  const data = res.data?.data
+  const msg = res.data?.message || ''
+  if (data) {
+    emailSmtpConfigured.value = data.smtpConfigured !== false
+    emailLastStats.value = {
+      total: data.totalTargets ?? 0,
+      success: data.successCount ?? 0,
+      fail: data.failCount ?? 0,
+    }
+    const lines = [
+      msg,
+      data.smtpConfigured === false ? '※ 서버에 SMTP가 설정되지 않았습니다.' : null,
+      `대상 ${data.totalTargets ?? 0}건 · 성공 ${data.successCount ?? 0}건 · 실패 ${data.failCount ?? 0}건`,
+    ].filter(Boolean)
+    emailResultMessage.value = lines.join('\n')
+  } else {
+    emailSmtpConfigured.value = true
+    emailResultMessage.value = msg
+  }
+}
+
 const historyRows = ref([])
 const historyPagination = ref(null)
 const historyLoading = ref(false)
@@ -997,5 +1231,50 @@ function shortAdminId(uuid) {
   to {
     transform: rotate(360deg);
   }
+}
+
+.push-email-dev {
+  margin-top: 0.25rem;
+}
+
+.push-email-card {
+  border: 1px dashed rgb(199 210 254);
+  background: linear-gradient(to bottom, #fff, rgb(248 250 252));
+}
+
+.push-email-actions .push-email-btn {
+  background: linear-gradient(180deg, #818cf8 0%, #6366f1 45%, #4f46e5 100%);
+  box-shadow: 0 4px 14px -4px rgba(79, 70, 229, 0.5);
+}
+
+.push-email-actions .push-email-btn:hover:not(:disabled) {
+  box-shadow: 0 6px 20px -4px rgba(79, 70, 229, 0.6);
+}
+
+.push-email-actions-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .push-email-actions-row {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .push-email-actions-row .push-submit {
+    flex: 1;
+    min-width: 12rem;
+  }
+}
+
+.push-email-btn-broadcast {
+  background: linear-gradient(180deg, #f87171 0%, #ef4444 45%, #dc2626 100%) !important;
+  box-shadow: 0 4px 14px -4px rgba(220, 38, 38, 0.55) !important;
+}
+
+.push-email-btn-broadcast:hover:not(:disabled) {
+  box-shadow: 0 6px 20px -4px rgba(220, 38, 38, 0.65) !important;
 }
 </style>
