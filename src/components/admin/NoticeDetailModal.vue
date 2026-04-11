@@ -53,8 +53,31 @@
             </div>
           </div>
 
+          <div v-if="pushResult" class="push-result-banner" :class="pushResultClass">
+            <span>{{ pushResult }}</span>
+            <button type="button" class="push-result-close" @click="pushResult = ''">×</button>
+          </div>
+
+          <div v-if="showBroadcastConfirm" class="push-confirm-bar">
+            <p class="push-confirm-msg">{{ broadcastConfirmMessage }}</p>
+            <div class="push-confirm-actions">
+              <button type="button" class="btn btn-secondary" @click="showBroadcastConfirm = false">
+                취소
+              </button>
+              <button type="button" class="btn btn-push" @click="handleBroadcast">발송</button>
+            </div>
+          </div>
+
           <div class="modal-footer">
             <button class="btn btn-danger" @click="handleDelete">삭제</button>
+            <button
+              class="btn btn-push"
+              :disabled="broadcasting || showBroadcastConfirm"
+              @click="openBroadcastConfirm"
+            >
+              <span v-if="broadcasting" class="btn-spinner" />
+              {{ broadcasting ? '발송 중…' : '푸시 발송' }}
+            </button>
             <button class="btn btn-primary" @click="handleEdit">수정</button>
           </div>
         </div>
@@ -64,6 +87,9 @@
 </template>
 
 <script setup>
+import { ref, computed, watch } from 'vue'
+import { useNoticeManagement } from '@/composables/useNoticeManagement'
+
 const props = defineProps({
   isOpen: {
     type: Boolean,
@@ -76,6 +102,77 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['close', 'edit', 'delete'])
+
+const { broadcastNotice } = useNoticeManagement()
+
+const broadcasting = ref(false)
+const showBroadcastConfirm = ref(false)
+const pushResult = ref('')
+const pushResultSuccess = ref(false)
+
+const pushResultClass = computed(() =>
+  pushResultSuccess.value ? 'push-result-success' : 'push-result-error'
+)
+
+const broadcastConfirmMessage = computed(() => {
+  const title = props.notice?.title || '(제목 없음)'
+  return `「${title}」 공지사항을 전체 사용자에게 푸시 알림으로 발송합니다. 계속할까요?`
+})
+
+watch(
+  () => props.isOpen,
+  (open) => {
+    if (open) {
+      pushResult.value = ''
+      broadcasting.value = false
+      showBroadcastConfirm.value = false
+    }
+  }
+)
+
+function openBroadcastConfirm() {
+  pushResult.value = ''
+  showBroadcastConfirm.value = true
+}
+
+function stripHtml(html) {
+  const div = document.createElement('div')
+  div.innerHTML = html
+  return div.textContent || div.innerText || ''
+}
+
+async function handleBroadcast() {
+  showBroadcastConfirm.value = false
+  broadcasting.value = true
+  pushResult.value = ''
+
+  try {
+    const title = props.notice?.title || ''
+    const plainContent = stripHtml(props.notice?.content || '').trim()
+    const body = plainContent.length > 200 ? plainContent.slice(0, 197) + '...' : plainContent
+
+    const res = await broadcastNotice(title, body)
+    const data = res.data
+    const msg = res.message || ''
+
+    if (data) {
+      const lines = [
+        msg,
+        `대상 ${data.totalTargets ?? 0}건 · 성공 ${data.successCount ?? 0}건 · 실패 ${data.failCount ?? 0}건`,
+      ].filter(Boolean)
+      pushResult.value = lines.join(' — ')
+      pushResultSuccess.value = data.firebaseConfigured !== false && (data.failCount ?? 0) === 0
+    } else {
+      pushResult.value = msg || '발송이 완료되었습니다.'
+      pushResultSuccess.value = true
+    }
+  } catch (e) {
+    pushResult.value = e?.response?.data?.message || '푸시 발송에 실패했습니다.'
+    pushResultSuccess.value = false
+  } finally {
+    broadcasting.value = false
+  }
+}
 
 function handleClose() {
   emit('close')
@@ -439,6 +536,115 @@ function getProcessedContent() {
 
 .btn-danger:hover {
   background: #dc2626;
+}
+
+.btn-push {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: linear-gradient(180deg, #818cf8 0%, #6366f1 45%, #4f46e5 100%);
+  color: white;
+  box-shadow: 0 2px 8px -2px rgba(79, 70, 229, 0.4);
+}
+
+.btn-push:hover:not(:disabled) {
+  box-shadow: 0 4px 12px -2px rgba(79, 70, 229, 0.55);
+}
+
+.btn-push:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.btn-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin-push 0.7s linear infinite;
+}
+
+@keyframes spin-push {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.push-result-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0 24px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.push-result-success {
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  color: #047857;
+}
+
+.push-result-error {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+}
+
+.push-result-close {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  color: inherit;
+  opacity: 0.6;
+  padding: 0 2px;
+  line-height: 1;
+}
+
+.push-result-close:hover {
+  opacity: 1;
+}
+
+.push-confirm-bar {
+  margin: 0 24px 8px;
+  padding: 14px 16px;
+  border-radius: 8px;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+}
+
+.push-confirm-msg {
+  font-size: 13px;
+  line-height: 1.55;
+  color: #92400e;
+  margin: 0 0 12px;
+}
+
+.push-confirm-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.push-confirm-actions .btn {
+  flex: 1;
+  padding: 8px 14px;
+  font-size: 13px;
+}
+
+.btn-secondary {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.btn-secondary:hover {
+  background: #e5e7eb;
 }
 
 .modal-enter-active,

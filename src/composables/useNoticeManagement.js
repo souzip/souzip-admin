@@ -129,6 +129,12 @@ export function useNoticeManagement() {
     return res.data.data
   }
 
+  // 공지사항 FCM 푸시 발송
+  async function broadcastNotice(title, body) {
+    const res = await client.post('/api/admin/push/broadcast', { title, body })
+    return res.data
+  }
+
   // 캐시 수동 무효화
   function invalidateCache() {
     allNoticesCache = null
@@ -143,6 +149,7 @@ export function useNoticeManagement() {
     getNoticeById,
     activateNotice,
     deactivateNotice,
+    broadcastNotice,
     invalidateCache,
   }
 }
